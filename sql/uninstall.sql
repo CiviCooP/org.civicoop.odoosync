@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS `civicrm_odoo_entity_sync`;
