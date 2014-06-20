@@ -3,6 +3,27 @@
 require_once 'odoosync.civix.php';
 
 /**
+ * Implementation of hook_civicrm_odoo_object_definition
+ * 
+ */
+function odoosync_civicrm_odoo_object_definition() {
+  $list[] = new CRM_OdooContactSync_ContactDefinition();
+  return $list;
+}
+
+
+/** 
+ * Implementation of hook_civicrm_post
+ * 
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_post
+ */
+function odoosync_civicrm_post($op,$objectName, $objectId, &$objectRef) {
+  //delegate the post hook to a class
+  $objects = CRM_Odoosync_Objectlist::singleton();
+  $objects->post($op,$objectName, $objectId, $objectRef);
+}
+
+/**
  * Implementation of hook_civicrm_config
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_config

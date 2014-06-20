@@ -18,21 +18,20 @@ class CRM_Odoosync_Objectlist {
   /**
    * Delegation of the post hook to resync objects
    * 
+   * Check if the object should be synced to Odoo!
+   * We do this by defining a list of objects which could be synced
+   * if it could be synced we save the object in the list
+   * to be synced later on by a background job
+   * 
    */
   public function post($op,$objectName, $objectId, &$objectRef) {
-    $saveForSync = false;
     foreach($this->list as $def) {
-      if ($def->getCiviCRMEntityName == $objectName) {
-        $saveForSync = true;
+      if ($def->isObjectNameSupported($objectName)) {
+        $this->saveForSync($op, $objectName, $objectId, $objectRef, $def);
         break;
       }
     }
-    
-    if ($saveForSync) {
-      //save entity for sync
-      $this->saveForSync($op, $objectName, $objectId, $objectRef);
-    }
-  } 
+  }
   
   /**
    * Singleton pattern
@@ -41,15 +40,15 @@ class CRM_Odoosync_Objectlist {
    */
   public static function singleton() {
     if (!self::$_instance) {
-      self::$_instance = new CRM_Odoosync_Parameters();
+      self::$_instance = new CRM_Odoosync_Objectlist();
     }
     return self::$_instance;
   }
   
-  protected function saveForSync($op, $objectName, $objectId, &$objectRef) {
+  protected function saveForSync($op, $objectName, $objectId, &$objectRef, CRM_Odoosync_Model_ObjectDefinitionInterface $objectDef) {
     //check if entity exist already exist
     $dao = CRM_Core_DAO::executeQuery("SELECT * FROM `civicrm_odoo_entity` WHERE `entity` = %1 AND `entity_id` = %2", array(
-      1 => array($objectName, 'String'),
+      1 => array($objectDef->getCiviCRMEntityName(), 'String'),
       2 => array($objectId, 'Positive')
     ));
     
@@ -71,21 +70,23 @@ class CRM_Odoosync_Objectlist {
       if ($action != 'DELETE') {
         $action = $dao->action;
       }
-      $sql = "UPDATE `civicrm_odoo_entity` SET `action` = %1, `change_date` = CURDATE() WHERE `id` = %2";
+      $sql = "UPDATE `civicrm_odoo_entity` SET `action` = %1, `weight` = %2 `change_date` = NOW() WHERE `id` = %3";
       CRM_Core_DAO::executeQuery($sql, array(
         1 => array($action, 'String'),
-        2 => array($dao->id, 'Integeer')
+        2 => array($objectDef->getWeight(), 'Integer'),
+        3 => array($dao->id, 'Integer')
       ));
     } else {
       //insert entity
       if ($action != 'DELETE') {
         $action = 'INSERT';
       }
-      $sql = "INSERT INTO `civicrm_odoo_entity` (`action`, `change_date`, `entity`, `entity_id`) VALUES(%1, CURDATE(), %2, %3);";
+      $sql = "INSERT INTO `civicrm_odoo_entity` (`action`, `change_date`, `entity`, `entity_id`, `weight`) VALUES(%1, NOW(), %2, %3, %4);";
       CRM_Core_DAO::executeQuery($sql, array(
         1 => array($action, 'String'),
-        2 => array($objectName, 'String'),
-        3 => array($objectId, 'Positive')
+        2 => array($objectDef->getCiviCRMEntityName(), 'String'),
+        3 => array($objectId, 'Positive'),
+        4 => array($objectDef->getWeight(), 'Integer'),
       ));
     }
   }
@@ -102,6 +103,15 @@ class CRM_Odoosync_Objectlist {
         }
       }
     }
+  }
+  
+  public function getSynchronisatorForEntity($entity) {
+    foreach($this->list as $def) {
+      if ($def->getCiviCRMEntityName() == $entity) {
+        return $def->getSynchronisator();
+      }
+    }
+    return false;
   }
 }
 
