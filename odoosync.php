@@ -1,6 +1,7 @@
 <?php
 
 require_once 'odoosync.civix.php';
+require_once __DIR__.'/lib/xmlrpc.inc';
 
 /**
  * Implementation of hook_civicrm_odoo_object_definition
@@ -21,6 +22,20 @@ function odoosync_civicrm_post($op,$objectName, $objectId, &$objectRef) {
   //delegate the post hook to a class
   $objects = CRM_Odoosync_Objectlist::singleton();
   $objects->post($op,$objectName, $objectId, $objectRef);
+}
+
+/**
+ * Implementation of hook_civicrm_navigationMenu
+ *
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_navigationMenu
+ */
+function odoosync_civicrm_navigationMenu( &$params ) {  
+  $item = array (
+    "name"=> ts('Odoo (OpenERP)'),
+    "url"=> "civicrm/admin/odoo",
+    "permission" => "administer CiviCRM",
+  );
+  _odoosync_civix_insert_navigation_menu($params, "Administer/System Settings", $item);
 }
 
 /**
