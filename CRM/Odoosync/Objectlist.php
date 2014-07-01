@@ -97,9 +97,9 @@ class CRM_Odoosync_Objectlist {
     
     $this->list = array();
     if (is_array($list)) {
-      foreach($list as $name => $definition) {
+      foreach($list as $definition) {
         if ($definition instanceof CRM_Odoosync_Model_ObjectDefinitionInterface) {
-          $this->list[$name] = $definition;
+          $this->list[$definition->getName()] = $definition;
         }
       }
     }

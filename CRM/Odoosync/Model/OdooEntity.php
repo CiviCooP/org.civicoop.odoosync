@@ -69,6 +69,7 @@ class CRM_Odoosync_Model_OdooEntity {
       }
     } catch (Exception $e) {
       $this->logSyncError($e->getMessage());
+      
     }
   }
   
@@ -95,19 +96,19 @@ class CRM_Odoosync_Model_OdooEntity {
   }
   
   private function logSyncError($error) {
-    $sql = "UPDATE `civicrm_odoo_entity` SET `sync_error`  = %1, `sync_error_date` = NOW() WHERE `id`  = %2";
-    CRM_Core_DAO::executeQuery($sql, array(
-      1 => array($error, 'String'),
-      2 => array($this->id, 'Positive')
-    ));
-    
     $sql_error_log = "INSERT INTO `civicrm_odoo_sync_error_log` (`entity`, `entity_id`, `odoo_id`, `date`, `action`, `error`) VALUES(%1, %2, %3, NOW(), %4, %5);";
     CRM_Core_DAO::executeQuery($sql_error_log, array(
       1 => array($this->entity, 'String'),
       2 => array($this->entity_id, 'Positive'),
-      3 => array($this->odoo_id, 'Positive'),
+      3 => array($this->odoo_id ? $this->odoo_id : '0', 'Integer'),
       4 => array($this->action, 'String'),
       5 => array($error, 'String')
+    ));
+    
+    $sql = "UPDATE `civicrm_odoo_entity` SET `last_error`  = %1, `last_error_date` = NOW() WHERE `id`  = %2";
+    CRM_Core_DAO::executeQuery($sql, array(
+      1 => array($error, 'String'),
+      2 => array($this->id, 'Positive')
     ));
   }
 }

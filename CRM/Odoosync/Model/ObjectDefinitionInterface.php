@@ -31,5 +31,12 @@ interface CRM_Odoosync_Model_ObjectDefinitionInterface {
    */
   public function getSynchronisator();
   
+  /**
+   * Returns the name of the synchronisator
+   * 
+   * @return String
+   */
+  public function getName();
+  
 }
 

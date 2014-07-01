@@ -27,6 +27,9 @@ Class CRM_OdooContactSync_ContactDefinition implements CRM_Odoosync_Model_Object
     return -100;
   }
   
+  public function getName() {
+    return 'civicrm_contact';
+  }
 }
 
 
