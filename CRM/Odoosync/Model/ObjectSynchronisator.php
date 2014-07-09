@@ -56,5 +56,21 @@ abstract class CRM_Odoosync_Model_ObjectSynchronisator {
   public function isThisItemSyncable(CRM_Odoosync_Model_OdooEntity $sync_entity) {
     return false;
   }
+  
+  /**
+   * Invokes a hook to extend/change the Odoo parameters
+   * 
+   * This could be useful to tweak for specific implementations 
+   * e.g. at one client all partners in Odoo where companies, even if they are actual persons
+   * 
+   * @param type $parameters
+   * @param type $entity
+   * @param type $entity_id
+   * @param String $action
+   * 
+   */
+  public function alterOdooParameters(&$parameters, $entity, $entity_id, $action) {
+    CRM_Utils_Hook::singleton()->invoke(4, $parameters, $entity, $entity_id, $action, CRM_Utils_Hook::$_nullObject, 'civicrm_odoo_alter_parameters');
+  }
 }
 
