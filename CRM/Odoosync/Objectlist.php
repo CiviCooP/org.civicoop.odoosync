@@ -58,19 +58,21 @@ class CRM_Odoosync_Objectlist {
         $action = "INSERT";
         break;
       case 'edit':
+      case 'trash':
+      case 'restore':
         $action = "UPDATE";
         break;
-      case 'delete':
+      case 'delete':        
         $action = 'DELETE';
         break;
     }
     
     if ($dao->fetch()) {
       //do update of current item
-      if ($action != 'DELETE') {
-        $action = $dao->action;
+      if (!empty($dao->action) && $dao->action == 'INSERT') {
+        $action = 'INSERT';
       }
-      $sql = "UPDATE `civicrm_odoo_entity` SET `action` = %1, `weight` = %2 `change_date` = NOW() WHERE `id` = %3";
+      $sql = "UPDATE `civicrm_odoo_entity` SET `action` = %1, `weight` = %2, `change_date` = NOW(), `status` = 'OUT OF SYNC' WHERE `id` = %3";
       CRM_Core_DAO::executeQuery($sql, array(
         1 => array($action, 'String'),
         2 => array($objectDef->getWeight(), 'Integer'),
@@ -81,7 +83,7 @@ class CRM_Odoosync_Objectlist {
       if ($action != 'DELETE') {
         $action = 'INSERT';
       }
-      $sql = "INSERT INTO `civicrm_odoo_entity` (`action`, `change_date`, `entity`, `entity_id`, `weight`) VALUES(%1, NOW(), %2, %3, %4);";
+      $sql = "INSERT INTO `civicrm_odoo_entity` (`action`, `change_date`, `entity`, `entity_id`, `weight`, `status`) VALUES(%1, NOW(), %2, %3, %4, 'OUT OF SYNC');";
       CRM_Core_DAO::executeQuery($sql, array(
         1 => array($action, 'String'),
         2 => array($objectDef->getCiviCRMEntityName(), 'String'),

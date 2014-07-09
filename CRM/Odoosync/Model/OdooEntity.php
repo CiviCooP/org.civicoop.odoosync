@@ -12,6 +12,8 @@ class CRM_Odoosync_Model_OdooEntity {
   
   protected $action;
   
+  protected $status;
+  
   public function __construct(CRM_Core_DAO $dao) {
     $this->id = $dao->id;
     $this->entity = $dao->entity;
@@ -37,12 +39,26 @@ class CRM_Odoosync_Model_OdooEntity {
       return;
     }
     
+    //set action to update if object still exists in database (e.g. it is only a soft delete)
+    if ($this->action == 'DELETE' && $synchronisator->existsInCivi($this)) {
+      $this->action = 'UPDATE';
+    } elseif (!$synchronisator->existsInCivi($this)) {
+      $this->action = 'DELETE'; //delete from Odoo because entity does not exist in civi anymore
+    }
+    
+    //check if we shoudl sync this item
+    if ($this->action != 'DELETE' && !$synchronisator->isThisItemSyncable($this)) {
+      $this->status = "NOT SYNCABLE";
+      $this->save();
+      return;
+    }
+    
     if (!$this->odoo_id) {
       $odoo_id = $synchronisator->findOdooId($this);
       if ($odoo_id) {
         $this->odoo_id = $odoo_id;
       }
-    } elseif (!$synchronisator->existsInOdoo($this->odoo_id, $this)) {
+    } elseif ($this->action != 'DELETE' && !$synchronisator->existsInOdoo($this->odoo_id, $this)) {
       $this->logSyncError('Entity doesn\'t exist in Odoo anymore');
       return;
     }
@@ -56,14 +72,18 @@ class CRM_Odoosync_Model_OdooEntity {
       switch($this->action) {
         case 'INSERT':
           $this->odoo_id = $synchronisator->performInsert($this);
+          $this->status = "SYNCED";
           $this->save();
           break;
         case 'UPDATE':
           $this->odoo_id = $synchronisator->performUpdate($this->odoo_id, $this);
+          $this->status = "SYNCED";
           $this->save();
           break;
         case 'DELETE':
-          $this->odoo_id = $synchronisator->performDelete($this->odoo_id, $this);
+          if ($synchronisator->existsInOdoo($this->odoo_id, $this)) {
+            $this->odoo_id = $synchronisator->performDelete($this->odoo_id, $this);
+          }
           $this->remove();
           break;
       }
@@ -78,10 +98,11 @@ class CRM_Odoosync_Model_OdooEntity {
   }
   
   private function save() {
-    $sql = "UPDATE `civicrm_odoo_entity` SET `action` = NULL, odoo_id = %1, `sync_date` = NOW(), `last_error` = NULL, `last_error_date` = NULL WHERE `id` = %2";
+    $sql = "UPDATE `civicrm_odoo_entity` SET `action` = NULL, odoo_id = %1, `status` = %2, `sync_date` = NOW(), `last_error` = NULL, `last_error_date` = NULL WHERE `id` = %3";
     CRM_Core_DAO::executeQuery($sql, array(
       1 => array($this->odoo_id, 'Positive'),
-      2 => array($this->id, 'Positive'),
+      2 => array($this->status, 'String'),
+      3 => array($this->id, 'Positive'),
     ));
   }
   

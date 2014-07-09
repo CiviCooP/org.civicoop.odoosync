@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS `civicrm_odoo_entity` (
   `action` varchar(255) DEFAULT NULL,
   `weight` INT(11) NOT NULL default '0',
   `last_error` TEXT NULL ,
-  `last_error_date` DATETIME NULL
+  `last_error_date` DATETIME NULL,
+  `status` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 

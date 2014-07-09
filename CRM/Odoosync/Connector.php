@@ -63,6 +63,93 @@ class CRM_Odoosync_Connector {
     $this->log('Could not login into Odoo');
     return false;
   }
+  
+  public function search($resource, $key) {
+    $server_url = $this->config->getUrl();
+
+    $client = new xmlrpc_client($server_url . 'object');
+    $msg = new xmlrpcmsg('execute');
+    $msg->addParam(new xmlrpcval($this->config->getDatabasename(), "string"));
+    $msg->addParam(new xmlrpcval($this->getUserId(), "int"));
+    $msg->addParam(new xmlrpcval($this->config->getPassword(), "string"));
+    $msg->addParam(new xmlrpcval($resource, "string"));
+    $msg->addParam(new xmlrpcval("search", "string"));
+    $msg->addParam(new xmlrpcval($key, "array"));
+
+    $resp = $client->send($msg);
+
+    if ($resp->faultCode()) {
+      $this->log('Error search a '.$resource.': '.$resp->faultCode(). ' (' . $resp->faultString().') with raw response: '.$resp->raw_data);
+      return false;
+    }
+    
+    return $resp->value()->scalarval();
+  }
+  
+  public function read($resource, $id) {
+    $server_url = $this->config->getUrl();
+
+    $client = new xmlrpc_client($server_url . 'object');
+    $msg = new xmlrpcmsg('execute');
+    $msg->addParam(new xmlrpcval($this->config->getDatabasename(), "string"));
+    $msg->addParam(new xmlrpcval($this->getUserId(), "int"));
+    $msg->addParam(new xmlrpcval($this->config->getPassword(), "string"));
+    $msg->addParam(new xmlrpcval($resource, "string"));
+    $msg->addParam(new xmlrpcval("read", "string"));
+    $msg->addParam(new xmlrpcval($id, "int"));
+
+    $resp = $client->send($msg);
+
+    if ($resp->faultCode()) {
+      $this->log('Error search a '.$resource.': '.$resp->faultCode(). ' (' . $resp->faultString().') with raw response: '.$resp->raw_data);
+      return false;
+    }
+    
+    return $resp->value()->scalarval();
+  }
+  
+  public function write($resource, $id, $parameters) {
+    $server_url = $this->config->getUrl();
+
+    $client = new xmlrpc_client($server_url . 'object');
+    $msg = new xmlrpcmsg('execute');
+    $msg->addParam(new xmlrpcval($this->config->getDatabasename(), "string"));
+    $msg->addParam(new xmlrpcval($this->getUserId(), "int"));
+    $msg->addParam(new xmlrpcval($this->config->getPassword(), "string"));
+    $msg->addParam(new xmlrpcval($resource, "string"));
+    $msg->addParam(new xmlrpcval("write", "string"));
+    $msg->addParam(new xmlrpcval($id, "int"));
+    $msg->addParam(new xmlrpcval($parameters, "struct"));
+
+    $resp = $client->send($msg);
+
+    if ($resp->faultCode()) {
+      $this->log('Error search a '.$resource.': '.$resp->faultCode(). ' (' . $resp->faultString().') with raw response: '.$resp->raw_data);
+      return false;
+    }
+    return $resp->value()->scalarval();
+  }
+  
+  public function unlink($resource, $id) {
+    $server_url = $this->config->getUrl();
+
+    $client = new xmlrpc_client($server_url . 'object');
+    $msg = new xmlrpcmsg('execute');
+    $msg->addParam(new xmlrpcval($this->config->getDatabasename(), "string"));
+    $msg->addParam(new xmlrpcval($this->getUserId(), "int"));
+    $msg->addParam(new xmlrpcval($this->config->getPassword(), "string"));
+    $msg->addParam(new xmlrpcval($resource, "string"));
+    $msg->addParam(new xmlrpcval("unlink", "string"));
+    $msg->addParam(new xmlrpcval(array(new xmlrpcval($id, "int")), "array"));
+
+    $resp = $client->send($msg);
+
+    if ($resp->faultCode()) {
+      $this->log('Error search a '.$resource.': '.$resp->faultCode(). ' (' . $resp->faultString().') with raw response: '.$resp->raw_data);
+      return false;
+    }
+    return $resp->value()->scalarval();
+  }
 
   public function create($resource, $parameters) {
     $server_url = $this->config->getUrl();
