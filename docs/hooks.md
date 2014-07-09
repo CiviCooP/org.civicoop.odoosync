@@ -28,7 +28,7 @@ The parameter array can be altered in this hook
 
     function odoosync_civicrm_odoo_alter_parameters(&$parameters, $entity, $entity_id, $action) {
         if ($entity == 'civicrm_contact') {
-            $contact = civicrm_api3('Contact', 'getsingle', array('id' => $entity_id);
+            $contact = civicrm_api3('Contact', 'getsingle', array('id' => $entity_id));
             if ($contact['contact_type'] == 'Individual') {
                 $parameters['is_company'] = new xmlrpcval(true, 'boolean');
             }

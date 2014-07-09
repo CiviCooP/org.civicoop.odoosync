@@ -70,7 +70,11 @@ abstract class CRM_Odoosync_Model_ObjectSynchronisator {
    * 
    */
   public function alterOdooParameters(&$parameters, $entity, $entity_id, $action) {
-    CRM_Utils_Hook::singleton()->invoke(4, $parameters, $entity, $entity_id, $action, CRM_Utils_Hook::$_nullObject, 'civicrm_odoo_alter_parameters');
+    try {
+      CRM_Utils_Hook::singleton()->invoke(4, $parameters, $entity, $entity_id, $action, CRM_Utils_Hook::$_nullObject, 'civicrm_odoo_alter_parameters');
+    } Catch (Exception $ex) {
+      //do nothing
+    }
   }
 }
 

@@ -8,7 +8,7 @@
 Class CRM_OdooContactSync_ContactDefinition implements CRM_Odoosync_Model_ObjectDefinitionInterface {
   
   public function getCiviCRMEntityName() {
-    return 'civcirm_contact';
+    return 'civicrm_contact';
   }
   
   public function isObjectNameSupported($objectName) {

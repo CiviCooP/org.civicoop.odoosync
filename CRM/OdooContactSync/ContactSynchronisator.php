@@ -34,7 +34,7 @@ class CRM_OdooContactSync_ContactSynchronisator extends CRM_Odoosync_Model_Objec
    */
   public function performInsert(CRM_Odoosync_Model_OdooEntity $sync_entity) {
     $contact = $this->getContact($sync_entity->getEntityId());
-    $parameters = $this->getOdooParameters($contact);
+    $parameters = $this->getOdooParameters($contact, $sync_entity->getEntity(), $sync_entity->getEntityId(), 'create');
     $odoo_id = $this->connector->create('res.partner', $parameters);
     if ($odoo_id) {
       return $odoo_id;
@@ -50,7 +50,7 @@ class CRM_OdooContactSync_ContactSynchronisator extends CRM_Odoosync_Model_Objec
    */
   public function performUpdate($odoo_id, CRM_Odoosync_Model_OdooEntity $sync_entity) {
     $contact = $this->getContact($sync_entity->getEntityId());
-    $parameters = $this->getOdooParameters($contact);
+    $parameters = $this->getOdooParameters($contact, $sync_entity->getEntity(), $sync_entity->getEntityId(), 'write');
     if ($this->connector->write('res.partner', $odoo_id, $parameters)) {
       return $odoo_id;
     }
@@ -87,13 +87,16 @@ class CRM_OdooContactSync_ContactSynchronisator extends CRM_Odoosync_Model_Objec
    * @param type $contact
    * @return \xmlrpcval
    */
-  protected function getOdooParameters($contact) {
+  protected function getOdooParameters($contact, $entity, $entity_id, $action) {
     $parameters = array(
       'display_name' => new xmlrpcval($contact['display_name'], 'string'),
       'name' => new xmlrpcval($contact['display_name'], 'string'),
       'title' => new xmlrpcval($contact['prefix'], 'string'),
       'is_company' => new xmlrpcval($contact['contact_type'] != 'Individual' ? true : false, 'boolean'),
     );
+    
+    $this->alterOdooParameters($parameters, $entity, $entity_id, $action);
+    
     return $parameters;
   }
  
