@@ -1,23 +1,21 @@
 <?php
 
-class CRM_OdooContactSync_ContactSynchronisator extends CRM_Odoosync_Model_ObjectSynchronisator {
+class CRM_OdooContactSync_AddressSynchronisator extends CRM_Odoosync_Model_ObjectSynchronisator {
   
-  protected $_contactCache = array();
+  protected $_addressCache = array();
   
   public function isThisItemSyncable(CRM_Odoosync_Model_OdooEntity $sync_entity) {
-    $contact = $this->getContact($sync_entity->getEntityId());
-    
-    //do not sync households
-    if ($contact['contact_type'] == 'Household') {
-      return false;
+    $address = $this->getAddress($sync_entity->getEntityId());
+    //only sync primary addresses
+    if ($address['is_primary']) {
+      return true;
     }
-    
-    return true;
+    return false;
   }
   
   public function existsInCivi(CRM_Odoosync_Model_OdooEntity $sync_entity) {
     try {
-      $contact = civicrm_api3('Contact', 'getsingle', array('id' => $sync_entity->getEntityId()));
+      $address = civicrm_api3('Address', 'getsingle', array('id' => $sync_entity->getEntityId()));
     } catch (CiviCRM_API3_Exception $ex) {
       return false;
     }
@@ -33,12 +31,12 @@ class CRM_OdooContactSync_ContactSynchronisator extends CRM_Odoosync_Model_Objec
    * @throws Exception
    */
   public function performInsert(CRM_Odoosync_Model_OdooEntity $sync_entity) {
-    $contact = $this->getContact($sync_entity->getEntityId());
-    $parameters = $this->getOdooParameters($contact, $sync_entity->getEntity(), $sync_entity->getEntityId(), 'create');
-    $odoo_id = $this->connector->create($this->getOdooResourceType(), $parameters);
+    $address = $this->getAddress($sync_entity->getEntityId());
+    $parameters = $this->getOdooParameters($address, $sync_entity->getEntity(), $sync_entity->getEntityId(), 'create');
+    /*$odoo_id = $this->connector->create($this->getOdooResourceType(), $parameters);
     if ($odoo_id) {
       return $odoo_id;
-    }
+    }*/
     throw new Exception('Could not insert contact into Odoo');
   }
   
@@ -49,11 +47,11 @@ class CRM_OdooContactSync_ContactSynchronisator extends CRM_Odoosync_Model_Objec
    * @param CRM_Odoosync_Model_OdooEntity $sync_entit
    */
   public function performUpdate($odoo_id, CRM_Odoosync_Model_OdooEntity $sync_entity) {
-    $contact = $this->getContact($sync_entity->getEntityId());
+    $address = $this->getAddress($sync_entity->getEntityId());
     $parameters = $this->getOdooParameters($contact, $sync_entity->getEntity(), $sync_entity->getEntityId(), 'write');
-    if ($this->connector->write($this->getOdooResourceType(), $odoo_id, $parameters)) {
+    /*if ($this->connector->write($this->getOdooResourceType(), $odoo_id, $parameters)) {
       return $odoo_id;
-    }
+    }*/
     throw new Exception('Could not update contact into Odoo');
   }
   
@@ -64,9 +62,9 @@ class CRM_OdooContactSync_ContactSynchronisator extends CRM_Odoosync_Model_Objec
    * @param CRM_Odoosync_Model_OdooEntity $sync_entity
    */
   public function performDelete($odoo_id, CRM_Odoosync_Model_OdooEntity $sync_entity) {
-    if ($this->connector->unlink($this->getOdooResourceType(), $odoo_id)) {
+    /*if ($this->connector->unlink($this->getOdooResourceType(), $odoo_id)) {
       return -1;
-    }
+    }*/
     throw new Exception('Could not delete contact from Odoo');
   }
   
@@ -89,8 +87,8 @@ class CRM_OdooContactSync_ContactSynchronisator extends CRM_Odoosync_Model_Objec
    * @param type $contact
    * @return \xmlrpcval
    */
-  protected function getOdooParameters($contact, $entity, $entity_id, $action) {
-    $parameters = array(
+  protected function getOdooParameters($address, $entity, $entity_id, $action) {
+    /*$parameters = array(
       'display_name' => new xmlrpcval($contact['display_name'], 'string'),
       'name' => new xmlrpcval($contact['display_name'], 'string'),
       'title' => new xmlrpcval($contact['prefix'], 'string'),
@@ -99,15 +97,15 @@ class CRM_OdooContactSync_ContactSynchronisator extends CRM_Odoosync_Model_Objec
     
     $this->alterOdooParameters($parameters, $entity, $entity_id, $action);
     
-    return $parameters;
+    return $parameters;*/
   }
  
-  protected function getContact($contactId) {
-    if (!isset($this->_contactCache[$contactId])) {
-      $this->_contactCache[$contactId] = civicrm_api3('Contact', 'getsingle', array('id' => $contactId));
+  protected function getAddress($entity_id) {
+    if (!isset($this->_addressCache[$entity_id])) {
+      $this->_addressCache[$entity_id] = civicrm_api3('Address', 'getsingle', array('id' => $entity_id));
     }
     
-    return $this->_contactCache[$contactId];
+    return $this->_addressCache[$entity_id];
   }
   
 }

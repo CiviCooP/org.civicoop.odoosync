@@ -8,6 +8,8 @@ class CRM_Odoosync_Model_OdooEntity {
   
   protected $entity_id;
   
+  protected $odoo_resource;
+  
   protected $odoo_id;
   
   protected $action;
@@ -58,7 +60,7 @@ class CRM_Odoosync_Model_OdooEntity {
       if ($odoo_id) {
         $this->odoo_id = $odoo_id;
       }
-    } elseif ($this->action != 'DELETE' && !$synchronisator->existsInOdoo($this->odoo_id, $this)) {
+    } elseif ($this->action != 'DELETE' && !$synchronisator->existsInOdoo($this->odoo_id)) {
       $this->logSyncError('Entity doesn\'t exist in Odoo anymore');
       return;
     }
@@ -72,11 +74,13 @@ class CRM_Odoosync_Model_OdooEntity {
       switch($this->action) {
         case 'INSERT':
           $this->odoo_id = $synchronisator->performInsert($this);
+          $this->odoo_resource = $synchronisator->getOdooResourceType();
           $this->status = "SYNCED";
           $this->save();
           break;
         case 'UPDATE':
           $this->odoo_id = $synchronisator->performUpdate($this->odoo_id, $this);
+          $this->odoo_resource = $synchronisator->getOdooResourceType();
           $this->status = "SYNCED";
           $this->save();
           break;
@@ -98,11 +102,12 @@ class CRM_Odoosync_Model_OdooEntity {
   }
   
   private function save() {
-    $sql = "UPDATE `civicrm_odoo_entity` SET `action` = NULL, odoo_id = %1, `status` = %2, `sync_date` = NOW(), `last_error` = NULL, `last_error_date` = NULL WHERE `id` = %3";
+    $sql = "UPDATE `civicrm_odoo_entity` SET `action` = NULL, odoo_resource = %1, odoo_id = %2, `status` = %3, `sync_date` = NOW(), `last_error` = NULL, `last_error_date` = NULL WHERE `id` = %4";
     CRM_Core_DAO::executeQuery($sql, array(
-      1 => array($this->odoo_id, 'Positive'),
-      2 => array($this->status, 'String'),
-      3 => array($this->id, 'Positive'),
+      1 => array($this->odoo_resource, 'String'),
+      2 => array($this->odoo_id, 'Positive'),
+      3 => array($this->status, 'String'),
+      4 => array($this->id, 'Positive'),
     ));
   }
   

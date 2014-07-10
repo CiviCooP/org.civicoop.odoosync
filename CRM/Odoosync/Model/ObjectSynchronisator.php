@@ -27,12 +27,6 @@ abstract class CRM_Odoosync_Model_ObjectSynchronisator {
   abstract public function findOdooId(CRM_Odoosync_Model_OdooEntity $sync_entity);
   
   /**
-   * Check if in an entity still exists in Odoo
-   * 
-   */
-  abstract public function existsInOdoo($odoo_id, CRM_Odoosync_Model_OdooEntity $sync_entity);
-  
-  /**
    * Checks if an entity still exists in CiviCRM.
    * 
    * This is used to check wether a civicrm entity is soft deleted or hard deleted. 
@@ -41,10 +35,34 @@ abstract class CRM_Odoosync_Model_ObjectSynchronisator {
    */
   abstract public function existsInCivi(CRM_Odoosync_Model_OdooEntity $sync_entity);
   
+  /**
+   * Returns the name of the Odoo resource e.g. res.partner
+   * 
+   * @return string
+   */
+  abstract public function getOdooResourceType();
+  
+  /**
+   *
+   * @var CRM_Odoosync_Connector 
+   */
   protected $connector;
   
   public function __construct() {
     $this->connector = CRM_Odoosync_Connector::singleton();
+  }
+  
+  /**
+   * Check if in an entity still exists in Odoo
+   * 
+   * @param int $odoo_id
+   * @return boolean
+   */
+  public function existsInOdoo($odoo_id) {
+    if ($this->connector->read($this->getOdooResourceType(), $odoo_id)) {
+      return true;
+    }
+    return false;
   }
   
   /**

@@ -91,6 +91,45 @@ class CRM_Odoosync_Objectlist {
         4 => array($objectDef->getWeight(), 'Integer'),
       ));
     }
+    
+    $this->saveAllDependencies($objectDef, $objectId);
+  }
+  
+  private function saveAllDependencies(CRM_Odoosync_Model_ObjectDefinitionInterface $objectDef, $entity_id) {
+    if ($objectDef instanceof CRM_Odoosync_Model_ObjectDependencyInterface) {
+      //definition has dependencies check those and save them into the sync queue
+      foreach($objectDef->getSyncDependenciesForEntity($entity_id) as $dep) {
+        $this->saveDependency($dep);
+      }
+    }
+  }
+  
+  private function saveDependency(CRM_Odoosync_Model_Dependency $dep) {
+    $objectDef = $this->getDefinitionForEntity($dep->getEntity());
+    
+    if ($objectDef === false) {
+      return;
+    }
+    
+    //check if entity exist already exist
+    $dao = CRM_Core_DAO::executeQuery("SELECT * FROM `civicrm_odoo_entity` WHERE `entity` = %1 AND `entity_id` = %2", array(
+      1 => array($dep->getEntity(), 'String'),
+      2 => array($dep->getEntityId(), 'Positive')
+    ));
+    
+    if (!$dao->fetch()) {
+      //entity does not exist yet
+      $action = 'INSERT';
+      $sql = "INSERT INTO `civicrm_odoo_entity` (`action`, `change_date`, `entity`, `entity_id`, `weight`, `status`) VALUES(%1, NOW(), %2, %3, %4, 'OUT OF SYNC');";
+      CRM_Core_DAO::executeQuery($sql, array(
+        1 => array($action, 'String'),
+        2 => array($dep->getEntity(), 'String'),
+        3 => array($dep->getEntityId(), 'Positive'),
+        4 => array($objectDef->getWeight(), 'Integer'),
+      ));
+    }
+    
+    $this->saveAllDependencies($objectDef, $dep->getEntityId());
   }
   
   private function loadObjectlist() {
@@ -111,6 +150,15 @@ class CRM_Odoosync_Objectlist {
     foreach($this->list as $def) {
       if ($def->getCiviCRMEntityName() == $entity) {
         return $def->getSynchronisator();
+      }
+    }
+    return false;
+  }
+  
+  public function getDefinitionForEntity($entity) {
+    foreach($this->list as $def) {
+      if ($def->getCiviCRMEntityName() == $entity) {
+        return $def;
       }
     }
     return false;
