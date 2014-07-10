@@ -137,5 +137,25 @@ class CRM_Odoosync_Model_OdooEntity {
       2 => array($this->id, 'Positive')
     ));
   }
+  
+  /**
+   * Return the stored odoo_id for an entity
+   * 
+   * @param String $entity
+   * @param int $entity_id
+   * @return int|false
+   */
+  public function findOdooIdByEntity($entity, $entity_id) {
+    $sql = "SELECT `odoo_id`  FROM `civicrm_odoo_entity` WHERE `entity` = %1  AND `entity_id`  = %2";
+    $dao = CRM_Core_DAO::executeQuery($sql, array(
+      1 => array($entity, 'String'),
+      2 => array($entity_id, 'Integer'),
+    ));
+    
+    if ($dao->fetch()) {
+      return $dao->odoo_id;
+    } 
+    return false;
+  }
 }
 

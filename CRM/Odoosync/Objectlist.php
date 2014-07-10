@@ -92,24 +92,26 @@ class CRM_Odoosync_Objectlist {
       ));
     }
     
-    $this->saveAllDependencies($objectDef, $objectId);
+    $this->saveAllDependencies($objectDef, $objectId, $objectDef->getWeight() - 1);
   }
   
-  private function saveAllDependencies(CRM_Odoosync_Model_ObjectDefinitionInterface $objectDef, $entity_id) {
+  private function saveAllDependencies(CRM_Odoosync_Model_ObjectDefinitionInterface $objectDef, $entity_id, $weight) {
     if ($objectDef instanceof CRM_Odoosync_Model_ObjectDependencyInterface) {
       //definition has dependencies check those and save them into the sync queue
       foreach($objectDef->getSyncDependenciesForEntity($entity_id) as $dep) {
-        $this->saveDependency($dep);
+        $this->saveDependency($dep, $weight);
       }
     }
   }
   
-  private function saveDependency(CRM_Odoosync_Model_Dependency $dep) {
+  private function saveDependency(CRM_Odoosync_Model_Dependency $dep, $weight) {
     $objectDef = $this->getDefinitionForEntity($dep->getEntity());
     
     if ($objectDef === false) {
       return;
     }
+    
+    $weightToUse = ($objectDef->getWeight() < $weight) ? $objectDef->getWeight() : $weight;
     
     //check if entity exist already exist
     $dao = CRM_Core_DAO::executeQuery("SELECT * FROM `civicrm_odoo_entity` WHERE `entity` = %1 AND `entity_id` = %2", array(
@@ -125,11 +127,11 @@ class CRM_Odoosync_Objectlist {
         1 => array($action, 'String'),
         2 => array($dep->getEntity(), 'String'),
         3 => array($dep->getEntityId(), 'Positive'),
-        4 => array($objectDef->getWeight(), 'Integer'),
+        4 => array($weightToUse, 'Integer'),
       ));
     }
     
-    $this->saveAllDependencies($objectDef, $dep->getEntityId());
+    $this->saveAllDependencies($objectDef, $dep->getEntityId(), $weightToUse - 1);
   }
   
   private function loadObjectlist() {

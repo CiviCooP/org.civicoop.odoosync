@@ -48,7 +48,14 @@ abstract class CRM_Odoosync_Model_ObjectSynchronisator {
    */
   protected $connector;
   
-  public function __construct() {
+  /**
+   * 
+   * @var CRM_Odoosync_Model_ObjectDefinitionInterface
+   */
+  protected $objectDefinition;
+  
+  public function __construct(CRM_Odoosync_Model_ObjectDefinitionInterface $objectDefinition) {
+    $this->objectDefinition = $objectDefinition;
     $this->connector = CRM_Odoosync_Connector::singleton();
   }
   

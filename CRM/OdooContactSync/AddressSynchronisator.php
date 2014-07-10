@@ -31,13 +31,9 @@ class CRM_OdooContactSync_AddressSynchronisator extends CRM_Odoosync_Model_Objec
    * @throws Exception
    */
   public function performInsert(CRM_Odoosync_Model_OdooEntity $sync_entity) {
-    $address = $this->getAddress($sync_entity->getEntityId());
-    $parameters = $this->getOdooParameters($address, $sync_entity->getEntity(), $sync_entity->getEntityId(), 'create');
-    /*$odoo_id = $this->connector->create($this->getOdooResourceType(), $parameters);
-    if ($odoo_id) {
-      return $odoo_id;
-    }*/
-    throw new Exception('Could not insert contact into Odoo');
+    //an insert is impossible because we only sync primary addresses
+    //and store them at the partner entity in Odoo
+    throw new Exception('It is imposible to insert an address into Odoo');
   }
   
   /**
@@ -48,11 +44,11 @@ class CRM_OdooContactSync_AddressSynchronisator extends CRM_Odoosync_Model_Objec
    */
   public function performUpdate($odoo_id, CRM_Odoosync_Model_OdooEntity $sync_entity) {
     $address = $this->getAddress($sync_entity->getEntityId());
-    $parameters = $this->getOdooParameters($contact, $sync_entity->getEntity(), $sync_entity->getEntityId(), 'write');
+    $parameters = $this->getOdooParameters($address, $sync_entity->getEntity(), $sync_entity->getEntityId(), 'write');
     /*if ($this->connector->write($this->getOdooResourceType(), $odoo_id, $parameters)) {
       return $odoo_id;
     }*/
-    throw new Exception('Could not update contact into Odoo');
+    throw new Exception('Could not update partner in Odoo');
   }
   
   /**
@@ -68,7 +64,24 @@ class CRM_OdooContactSync_AddressSynchronisator extends CRM_Odoosync_Model_Objec
     throw new Exception('Could not delete contact from Odoo');
   }
   
+  /**
+   * If the address is a primary address retrieve the odoo of the contact
+   * 
+   * In odoo we store the primary address at partner level because there is no such thing as an address entity in Odoo
+   * 
+   * @param CRM_Odoosync_Model_OdooEntity $sync_entity
+   * @return boolean
+   */
   public function findOdooId(CRM_Odoosync_Model_OdooEntity $sync_entity) {
+    $address = $this->getAddress($sync_entity->getEntityId());
+    $contact_id = $address['contact_id'];
+    
+    //look up the partner id if address is primary
+    if ($address['is_primary']) {
+      $odoo_id = $sync_entity->findOdooIdByEntity('civicrm_contact', $contact_id);
+      return $odoo_id;
+    }    
+    
     return false;
   }
   
@@ -88,16 +101,16 @@ class CRM_OdooContactSync_AddressSynchronisator extends CRM_Odoosync_Model_Objec
    * @return \xmlrpcval
    */
   protected function getOdooParameters($address, $entity, $entity_id, $action) {
-    /*$parameters = array(
-      'display_name' => new xmlrpcval($contact['display_name'], 'string'),
-      'name' => new xmlrpcval($contact['display_name'], 'string'),
-      'title' => new xmlrpcval($contact['prefix'], 'string'),
-      'is_company' => new xmlrpcval($contact['contact_type'] != 'Individual' ? true : false, 'boolean'),
+    $parameters = array(
+      'street' => new xmlrpcval($address['street_address'], 'string'),
+      'city' => new xmlrpcval($address['city'], 'string'),
+      'zip' => new xmlrpcval($address['postal_code'], 'string'),
+      //'country' => new xmlrpcval($address['country'], 'string'),
     );
     
     $this->alterOdooParameters($parameters, $entity, $entity_id, $action);
     
-    return $parameters;*/
+    return $parameters;
   }
  
   protected function getAddress($entity_id) {

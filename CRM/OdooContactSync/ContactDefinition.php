@@ -20,7 +20,7 @@ Class CRM_OdooContactSync_ContactDefinition implements CRM_Odoosync_Model_Object
   }
   
   public function getSynchronisator() {
-    return new CRM_OdooContactSync_ContactSynchronisator();
+    return new CRM_OdooContactSync_ContactSynchronisator($this);
   }
   
   public function getWeight() {
