@@ -10,7 +10,31 @@ class CRM_OdooContactSync_AddressSynchronisator extends CRM_Odoosync_Model_Objec
     if ($address['is_primary']) {
       return true;
     }
+    
+    //adress is not syncable, clear address of partner if item is already synced intoo Odoo    
+    $this->clearAddressInOdoo($sync_entity, $address);
+    
     return false;
+  }
+  
+  
+  protected function clearAddressInOdoo(CRM_Odoosync_Model_OdooEntity $sync_entity, $address) {    
+    //adress is not syncable, clear address of partner if item is already synced intoo Odoo
+    if (!empty($sync_entity->getOdooId()) && $sync_entity->getOdooId() > 0) {
+      $ignoreFields = array('is_primary', 'id');
+      foreach($address as $field => $val) {
+        if (in_array($field, $ignoreFields)) {
+          continue;
+        }
+        $address[$field] = '';
+      }
+      
+      $odoo_id = $sync_entity->getOdooId();
+      $parameters = $this->getOdooParameters($address, $sync_entity->getEntity(), $sync_entity->getEntityId(), 'clear');
+      if (!$this->connector->write($this->getOdooResourceType(), $odoo_id, $parameters)) {
+        throw new Exception('Could not clear address in Odoo');
+      }
+    }    
   }
   
   public function existsInCivi(CRM_Odoosync_Model_OdooEntity $sync_entity) {
@@ -33,7 +57,8 @@ class CRM_OdooContactSync_AddressSynchronisator extends CRM_Odoosync_Model_Objec
   public function performInsert(CRM_Odoosync_Model_OdooEntity $sync_entity) {
     //an insert is impossible because we only sync primary addresses
     //and store them at the partner entity in Odoo
-    throw new Exception('It is imposible to insert an address into Odoo');
+    //throw new Exception('It is imposible to insert an address into Odoo');
+    return -1; //a -1 ID means that the entity does not exist in Odoo
   }
   
   /**
@@ -45,10 +70,10 @@ class CRM_OdooContactSync_AddressSynchronisator extends CRM_Odoosync_Model_Objec
   public function performUpdate($odoo_id, CRM_Odoosync_Model_OdooEntity $sync_entity) {
     $address = $this->getAddress($sync_entity->getEntityId());
     $parameters = $this->getOdooParameters($address, $sync_entity->getEntity(), $sync_entity->getEntityId(), 'write');
-    /*if ($this->connector->write($this->getOdooResourceType(), $odoo_id, $parameters)) {
+    if ($this->connector->write($this->getOdooResourceType(), $odoo_id, $parameters)) {
       return $odoo_id;
-    }*/
-    throw new Exception('Could not update partner in Odoo');
+    }
+    throw new Exception("Could not update partner in Odoo");
   }
   
   /**
@@ -58,10 +83,10 @@ class CRM_OdooContactSync_AddressSynchronisator extends CRM_Odoosync_Model_Objec
    * @param CRM_Odoosync_Model_OdooEntity $sync_entity
    */
   public function performDelete($odoo_id, CRM_Odoosync_Model_OdooEntity $sync_entity) {
-    /*if ($this->connector->unlink($this->getOdooResourceType(), $odoo_id)) {
-      return -1;
-    }*/
-    throw new Exception('Could not delete contact from Odoo');
+    $objAdress = new CRM_Core_BAO_Address();
+    $address = array();
+    CRM_Core_DAO::storeValues($objAdress, $address);
+    $this->clearAddressInOdoo($sync_entity, $address);
   }
   
   /**
@@ -105,8 +130,14 @@ class CRM_OdooContactSync_AddressSynchronisator extends CRM_Odoosync_Model_Objec
       'street' => new xmlrpcval($address['street_address'], 'string'),
       'city' => new xmlrpcval($address['city'], 'string'),
       'zip' => new xmlrpcval($address['postal_code'], 'string'),
-      //'country' => new xmlrpcval($address['country'], 'string'),
+      'street2' => new xmlrpcval($address['supplemental_address_1'], 'string'),
     );
+    
+    $country_id = $this->findOdooCountryId($address['country_id']);
+    $parameters['country_id'] = new xmlrpcval($country_id, 'int');
+    
+    $state_id = $this->findOdooStateId($address['state_province_id'], $address['country_id']);
+    $parameters['state_id'] = new xmlrpcval($state_id, 'int');
     
     $this->alterOdooParameters($parameters, $entity, $entity_id, $action);
     
@@ -121,6 +152,80 @@ class CRM_OdooContactSync_AddressSynchronisator extends CRM_Odoosync_Model_Objec
     return $this->_addressCache[$entity_id];
   }
   
+  /**
+   * Returns the Odoo country ID for a civi country
+   * 
+   * @param type $civi_country_id
+   */
+  protected function findOdooCountryId($civi_country_id) {
+    static $cache = array();
+    if (!isset($cache[$civi_country_id])) {
+      $cache[$civi_country_id] = false; //when no country is found we should return false
+      $isoCode = CRM_Core_PseudoConstant::countryIsoCode($civi_country_id);
+    
+      //find country by its iso code
+      $searchKey = array(
+        new xmlrpcval(array(
+          new xmlrpcval('code', 'string'),
+          new xmlrpcval('=', 'string'),
+          new xmlrpcval($isoCode, 'string'),
+        ), "array")
+      ); 
+
+      $country_ids = $this->connector->search('res.country', $searchKey);
+      foreach($country_ids as $id_element) {
+        $id = $id_element->scalarval();
+        $cache[$civi_country_id] = $id;
+        break;
+      }
+    }
+    
+    return $cache[$civi_country_id];
+  }
+  
+    /**
+   * Returns the Odoo country ID for a civi country
+   * 
+   * @param type $civi_country_id
+   */
+  protected function findOdooStateId($civi_county_id, $civi_country_id) {
+    static $cache = array();
+    if (!isset($cache[$civi_county_id])) {
+      $cache[$civi_county_id] = false; //when no country is found we should return false
+      $state = CRM_Core_PseudoConstant::stateProvince($civi_county_id);
+      
+      //find country by its iso code
+      $searchKey = array(
+        new xmlrpcval(array(
+          new xmlrpcval('name', 'string'),
+          new xmlrpcval('=', 'string'),
+          new xmlrpcval($state, 'string'),
+        ), "array")
+      ); 
+
+      $state_ids = $this->connector->search('res.country.state', $searchKey);
+      foreach($state_ids as $id_element) {
+        $id = $id_element->scalarval();
+        $cache[$civi_county_id] = $id;
+        break;
+      }
+      
+      //create province in Odoo
+      $odoo_country_id = $this->findOdooCountryId($civi_country_id);
+      if ($odoo_country_id) {
+        //only create state if country exist
+        $state_code = CRM_Core_PseudoConstant::stateProvinceAbbreviation($civi_county_id);
+        $parameters['code'] = new xmlrpcval($state_code, "string");
+        $parameters['name'] = new xmlrpcval($state, "string");
+        $parameters['country_id'] = new xmlrpcval($odoo_country_id, "int");
+      
+        $new_odoo_state_id = $this->connector->create('res.country.state', $parameters);
+        $cache[$civi_county_id] = $new_odoo_state_id;
+      }
+    }
+    
+    return $cache[$civi_county_id];
+  }
 }
 
 

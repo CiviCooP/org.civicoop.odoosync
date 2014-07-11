@@ -11,6 +11,8 @@ class CRM_Odoosync_Objectlist {
   
   protected $list;
   
+  protected $processedEntities = array();
+  
   protected function __construct() {
     $this->loadObjectlist();
   }
@@ -45,7 +47,24 @@ class CRM_Odoosync_Objectlist {
     return self::$_instance;
   }
   
+  protected function resetProcessedEntityList() {
+    $this->processedEntities = array();
+  }
+  
+  protected function setProcessedEntity($entity, $entity_id) {
+    $this->processedEntities[$entity][$entity_id] = true;
+  }
+  
+  protected function isEntityProcessed($entity, $entity_id) {
+    if (isset($this->processedEntities[$entity]) && isset($this->processedEntities[$entity][$entity_id]) && $this->processedEntities[$entity][$entity_id]) {
+      return true;
+    }
+    return false;
+  }
+  
   protected function saveForSync($op, $objectName, $objectId, &$objectRef, CRM_Odoosync_Model_ObjectDefinitionInterface $objectDef) {
+    $this->resetProcessedEntityList();
+    
     //check if entity exist already exist
     $dao = CRM_Core_DAO::executeQuery("SELECT * FROM `civicrm_odoo_entity` WHERE `entity` = %1 AND `entity_id` = %2", array(
       1 => array($objectDef->getCiviCRMEntityName(), 'String'),
@@ -92,14 +111,18 @@ class CRM_Odoosync_Objectlist {
       ));
     }
     
-    $this->saveAllDependencies($objectDef, $objectId, $objectDef->getWeight() - 1);
+    $this->setProcessedEntity($objectDef->getCiviCRMEntityName(), $objectId);
+    
+    $data = array();
+    CRM_Core_DAO::storeValues($objectRef, $data);
+    $this->saveAllDependencies($objectDef, $objectId, $data);
   }
   
-  private function saveAllDependencies(CRM_Odoosync_Model_ObjectDefinitionInterface $objectDef, $entity_id, $weight) {
+  private function saveAllDependencies(CRM_Odoosync_Model_ObjectDefinitionInterface $objectDef, $entity_id, $data = false) {
     if ($objectDef instanceof CRM_Odoosync_Model_ObjectDependencyInterface) {
-      //definition has dependencies check those and save them into the sync queue
-      foreach($objectDef->getSyncDependenciesForEntity($entity_id) as $dep) {
-        $this->saveDependency($dep, $weight);
+      //definition has dependencies check those and save them into the sync queue      
+      foreach($objectDef->getSyncDependenciesForEntity($entity_id, $data) as $dep) {        
+        $this->saveDependency($dep, $objectDef->getWeight() + $dep->getWeightOffset());
       }
     }
   }
@@ -111,6 +134,10 @@ class CRM_Odoosync_Objectlist {
       return;
     }
     
+    if ($this->isEntityProcessed($dep->getEntity(), $dep->getEntityId())) {
+      return;
+    }
+    
     $weightToUse = ($objectDef->getWeight() < $weight) ? $objectDef->getWeight() : $weight;
     
     //check if entity exist already exist
@@ -119,7 +146,28 @@ class CRM_Odoosync_Objectlist {
       2 => array($dep->getEntityId(), 'Positive')
     ));
     
-    if (!$dao->fetch()) {
+    if ($dao->fetch()) {
+      //entity exist
+      if ($dep->isQueuedForUpdate()) {
+        $action = "UPDATE";
+        if ($dao->action == "INSERT") {
+          $action = "INSERT";
+        }
+        
+        $sql = "UPDATE `civicrm_odoo_entity` SET `weight` = %1, `action` = %2, `change_date` = NOW(), `status` = 'OUT OF SYNC' WHERE `id` = %3";
+        CRM_Core_DAO::executeQuery($sql, array(
+          1 => array($weightToUse, 'Integer'),
+          2 => array($action, 'String'),
+          3 => array($dao->id, 'Integer')
+        ));
+      } else {
+        $sql = "UPDATE `civicrm_odoo_entity` SET `weight` = %1 WHERE `id` = %2";
+        CRM_Core_DAO::executeQuery($sql, array(
+          1 => array($weightToUse, 'Integer'),
+          2 => array($dao->id, 'Integer')
+        ));
+      }     
+    } else {
       //entity does not exist yet
       $action = 'INSERT';
       $sql = "INSERT INTO `civicrm_odoo_entity` (`action`, `change_date`, `entity`, `entity_id`, `weight`, `status`) VALUES(%1, NOW(), %2, %3, %4, 'OUT OF SYNC');";
@@ -130,6 +178,8 @@ class CRM_Odoosync_Objectlist {
         4 => array($weightToUse, 'Integer'),
       ));
     }
+    
+    $this->setProcessedEntity($dep->getEntity(), $dep->getEntityId());
     
     $this->saveAllDependencies($objectDef, $dep->getEntityId(), $weightToUse - 1);
   }

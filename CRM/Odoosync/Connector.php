@@ -22,6 +22,8 @@ class CRM_Odoosync_Connector {
    */
   protected $userId = false;
   protected $log = "";
+  
+  protected $lastResponse;
 
   protected function __construct() {
     $this->config = CRM_Odoosync_Config_OdooParameters::singleton();
@@ -53,7 +55,10 @@ class CRM_Odoosync_Connector {
     $msg->addParam(new xmlrpcval($this->config->getDatabasename(), "string"));
     $msg->addParam(new xmlrpcval($this->config->getUsername(), "string"));
     $msg->addParam(new xmlrpcval($this->config->getPassword(), "string"));
+    
     $resp = $sock->send($msg);
+    $this->setLastResponse($resp);
+    
     $val = $resp->value();
     $id = $val->scalarval();
     if ($id > 0) {
@@ -77,6 +82,7 @@ class CRM_Odoosync_Connector {
     $msg->addParam(new xmlrpcval($key, "array"));
 
     $resp = $client->send($msg);
+    $this->setLastResponse($resp);
 
     if ($resp->faultCode()) {
       $this->log('Error search a '.$resource.': '.$resp->faultCode(). ' (' . $resp->faultString().') with raw response: '.$resp->raw_data);
@@ -99,6 +105,7 @@ class CRM_Odoosync_Connector {
     $msg->addParam(new xmlrpcval($id, "int"));
 
     $resp = $client->send($msg);
+    $this->setLastResponse($resp);
 
     if ($resp->faultCode()) {
       $this->log('Error search a '.$resource.': '.$resp->faultCode(). ' (' . $resp->faultString().') with raw response: '.$resp->raw_data);
@@ -122,6 +129,7 @@ class CRM_Odoosync_Connector {
     $msg->addParam(new xmlrpcval($parameters, "struct"));
 
     $resp = $client->send($msg);
+    $this->setLastResponse($resp);
 
     if ($resp->faultCode()) {
       $this->log('Error search a '.$resource.': '.$resp->faultCode(). ' (' . $resp->faultString().') with raw response: '.$resp->raw_data);
@@ -143,6 +151,7 @@ class CRM_Odoosync_Connector {
     $msg->addParam(new xmlrpcval(array(new xmlrpcval($id, "int")), "array"));
 
     $resp = $client->send($msg);
+    $this->setLastResponse($resp);
 
     if ($resp->faultCode()) {
       $this->log('Error search a '.$resource.': '.$resp->faultCode(). ' (' . $resp->faultString().') with raw response: '.$resp->raw_data);
@@ -164,6 +173,7 @@ class CRM_Odoosync_Connector {
     $msg->addParam(new xmlrpcval($parameters, "struct"));
 
     $resp = $client->send($msg);
+    $this->setLastResponse($resp);
 
     if ($resp->faultCode()) {
       $this->log('Error creating a '.$resource.': '.$resp->faultCode(). ' (' . $resp->faultString().') with raw response: '.$resp->raw_data);
@@ -171,6 +181,14 @@ class CRM_Odoosync_Connector {
     }
     
     return $resp->value()->scalarval();
+  }
+  
+  protected function setLastResponse($response) {
+    $this->lastResponse = $response;
+  }
+  
+  public function getLastResponseMessage() {
+    return var_export($this->lastResponse, true);
   }
 
   protected function log($msg) {
