@@ -5,21 +5,21 @@
  * 
  */
 
-Class CRM_OdooContactSync_AddressDefinition extends CRM_Odoosync_Model_ObjectDefinition implements CRM_Odoosync_Model_ObjectDependencyInterface {
+Class CRM_OdooContactSync_EmailDefinition extends CRM_Odoosync_Model_ObjectDefinition implements CRM_Odoosync_Model_ObjectDependencyInterface {
   
   public function getCiviCRMEntityName() {
-    return 'civicrm_address';
+    return 'civicrm_email';
   }
   
   public function isObjectNameSupported($objectName) {
-    if ($objectName == 'Address') {
+    if ($objectName == 'Email') {
       return true;
     }
     return false;
   }
   
   protected function getSynchronisatorClass() {
-    return 'CRM_OdooContactSync_AddressSynchronisator';
+    return 'CRM_OdooContactSync_EmailSynchronisator';
   }
   
   public function getWeight() {
@@ -27,7 +27,7 @@ Class CRM_OdooContactSync_AddressDefinition extends CRM_Odoosync_Model_ObjectDef
   }
   
   public function getName() {
-    return 'civicrm_address';
+    return 'civicrm_email';
   }
   
   public function getSyncDependenciesForEntity($entity_id, $data=false) {
@@ -36,28 +36,28 @@ Class CRM_OdooContactSync_AddressDefinition extends CRM_Odoosync_Model_ObjectDef
       if (is_array($data) && isset($data['contact_id'])) {
          $contact_id = $data['contact_id'];
       } else {
-        $contact_id = civicrm_api3('Address', 'getvalue', array('return' => 'contact_id', 'id' => $entity_id));
+        $contact_id = civicrm_api3('Email', 'getvalue', array('return' => 'contact_id', 'id' => $entity_id));
       }
       
       
       $dep[] = new CRM_Odoosync_Model_Dependency('civicrm_contact', $contact_id);
       
-      $addresses = civicrm_api3('Address', 'get', array('contact_id' => $contact_id));
-      foreach($addresses['values'] as $address) {
-        if (empty($address['id']) && $address['id'] == $entity_id) {
+      $emails = civicrm_api3('Email', 'get', array('contact_id' => $contact_id));
+      foreach($emails['values'] as $email) {
+        if (empty($email['id']) && $email['id'] == $entity_id) {
           //skip current address
           continue;
         }
         
         $weightOffset = -1;
-        if ($address['is_primary']) {
+        if ($email['is_primary']) {
           $weightOffset = 1; //make sure primary addresses are synced as last
           //by lowering the priority of the primary address we make sure
           //that non primary addresses can empty the primary adress field on 
           //res.partner before the primary sets them again
         }
         
-        $dep[] = new CRM_Odoosync_Model_Dependency('civicrm_address', $address['id'], $weightOffset, true);
+        $dep[] = new CRM_Odoosync_Model_Dependency('civicrm_email', $email['id'], $weightOffset, true);
       }
     } catch (Exception $ex) {
        //do nothing

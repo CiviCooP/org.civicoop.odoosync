@@ -5,7 +5,7 @@
  * 
  */
 
-Class CRM_OdooContactSync_ContactDefinition implements CRM_Odoosync_Model_ObjectDefinitionInterface {
+Class CRM_OdooContactSync_ContactDefinition extends CRM_Odoosync_Model_ObjectDefinition {
   
   public function getCiviCRMEntityName() {
     return 'civicrm_contact';
@@ -19,8 +19,8 @@ Class CRM_OdooContactSync_ContactDefinition implements CRM_Odoosync_Model_Object
     return false;
   }
   
-  public function getSynchronisator() {
-    return new CRM_OdooContactSync_ContactSynchronisator($this);
+  protected function getSynchronisatorClass() {
+    return 'CRM_OdooContactSync_ContactSynchronisator';
   }
   
   public function getWeight() {

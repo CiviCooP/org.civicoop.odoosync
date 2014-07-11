@@ -32,7 +32,7 @@ class CRM_Odoosync_Objectlist {
         $this->saveForSync($op, $objectName, $objectId, $objectRef, $def);
         break;
       }
-    }
+    } 
   }
   
   /**
@@ -185,16 +185,13 @@ class CRM_Odoosync_Objectlist {
   }
   
   private function loadObjectlist() {
+    $list = array();
     $hooks = CRM_Utils_Hook::singleton();
-    $list = $hooks->invoke(0, CRM_Utils_Hook::$_nullObject, CRM_Utils_Hook::$_nullObject, CRM_Utils_Hook::$_nullObject, CRM_Utils_Hook::$_nullObject, CRM_Utils_Hook::$_nullObject, 'civicrm_odoo_object_definition');
+    $hooks->invoke(1, $list, CRM_Utils_Hook::$_nullObject, CRM_Utils_Hook::$_nullObject, CRM_Utils_Hook::$_nullObject, CRM_Utils_Hook::$_nullObject, 'civicrm_odoo_object_definition');
     
     $this->list = array();
     if (is_array($list)) {
-      foreach($list as $definition) {
-        if ($definition instanceof CRM_Odoosync_Model_ObjectDefinitionInterface) {
-          $this->list[$definition->getName()] = $definition;
-        }
-      }
+      $this->list = $list;
     }
   }
   
