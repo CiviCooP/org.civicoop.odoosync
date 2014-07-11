@@ -23,3 +23,8 @@ have the following rules for synchronisation applied:
 - Only primary addresses are synchronised into Odoo
 - Only primary e-mailadresses are synchronised into Odoo
 - Only phone numbers of type Phone, Mobile and Fax are synchronised into Odoo
+
+Available hooks for developers
+------------------------------
+
+See See the [hooks](docs/hooks.md)
