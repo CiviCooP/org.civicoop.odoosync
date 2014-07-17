@@ -25,7 +25,8 @@ function civicrm_api3_odoo_sync($params) {
   $returnValues = array();
 
   $limit = isset($params['limit']) ? $params['limit'] : 1000;
-  CRM_Odoosync_Model_OdooEntity::sync();
+  $debug = isset($params['debug']) ? true : false;
+  CRM_Odoosync_Model_OdooEntity::sync($limit, $debug);
   
   // Spec: civicrm_api3_create_success($values = 1, $params = array(), $entity = NULL, $action = NULL)
   return civicrm_api3_create_success($returnValues, $params, 'Odoo', 'Sync');

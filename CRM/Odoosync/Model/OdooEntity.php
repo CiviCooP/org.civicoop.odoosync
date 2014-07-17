@@ -29,6 +29,10 @@ class CRM_Odoosync_Model_OdooEntity {
     $this->action = $dao->action;
   }
   
+  public function getId() {
+    return $this->id;
+  }
+  
   public function getEntity() {
     return $this->entity;
   }
@@ -49,7 +53,7 @@ class CRM_Odoosync_Model_OdooEntity {
     $this->odoo_field = $field;
   }
   
-  public function process() {
+  public function process($debug = false) {
     $objectList = CRM_Odoosync_Objectlist::singleton();
     
     $synchronisator = $objectList->getSynchronisatorForEntity($this->entity);
@@ -72,9 +76,9 @@ class CRM_Odoosync_Model_OdooEntity {
       return;
     }
     
-    if (!$this->odoo_id) {
+    if ($this->action != 'DELETE' && (!$this->odoo_id || $this->odoo_id <= 0)) {
       $odoo_id = $synchronisator->findOdooId($this);
-      if ($odoo_id) {
+      if ($odoo_id > 0) {
         $this->odoo_id = $odoo_id;
       }
     } elseif ($this->action != 'DELETE' && !$synchronisator->existsInOdoo($this->odoo_id)) {
@@ -83,7 +87,7 @@ class CRM_Odoosync_Model_OdooEntity {
     }
     
     //set action to update if we do an insert of an existing odoo entity
-    if ($this->action == 'INSERT' && $this->odoo_id) {
+    if ($this->action == 'INSERT' && $this->odoo_id > 0) {
       $this->action = 'UPDATE';
     }
     
@@ -110,6 +114,9 @@ class CRM_Odoosync_Model_OdooEntity {
       }
     } catch (Exception $e) {
       $this->logSyncError($e->getMessage());
+      if ($debug) {
+        throw $e;
+      }
     }
   }
   
@@ -128,13 +135,13 @@ class CRM_Odoosync_Model_OdooEntity {
     ));
   }
   
-  public static function sync($limit = 1000) {
-    $sql = "SELECT * FROM `civicrm_odoo_entity`  WHERE `action` IS NOT NULL AND `change_date` IS NOT NULL AND (`sync_date` IS NULL OR `change_date` > `sync_date`) ORDER BY `weight` ASC, `change_date` ASC LIMIT 0, %1";
+  public static function sync($limit = 1000, $debug=false) {
+    $sql = "SELECT * FROM `civicrm_odoo_entity`  WHERE `action` IS NOT NULL AND `change_date` IS NOT NULL AND (`sync_date` IS NULL OR `change_date` > `sync_date`) ORDER BY `weight` ASC, `action` ASC, `change_date` ASC LIMIT 0, %1";
     $dao = CRM_Core_DAO::executeQuery($sql, array(1=>array($limit, 'Positive')));
     while($dao->fetch()) {
       //sync this object
       $odooEntity = new CRM_Odoosync_Model_OdooEntity($dao);
-      $odooEntity->process();
+      $odooEntity->process($debug);
     }
   }
   
@@ -173,6 +180,24 @@ class CRM_Odoosync_Model_OdooEntity {
       return $dao->odoo_id;
     } 
     return false;
+  }
+  
+  public function findByOdooIdAndField($resource, $odoo_id, $odoo_field) {
+    $sql = "SELECT *  FROM `civicrm_odoo_entity` WHERE `odoo_resource` = %1  AND `odoo_id`  = %2 AND `odoo_field`  = %3";
+    $dao = CRM_Core_DAO::executeQuery($sql, array(
+      1 => array($resource, 'String'),
+      2 => array($odoo_id, 'Integer'),
+      3 => array($odoo_field, 'String'),
+    ));
+    
+    $values = array();
+    while($dao->fetch()) {
+      $v = array();
+      CRM_Core_DAO::storeValues($dao, $v);
+      $values[$dao->id] = $v;
+    }
+    
+    return $values;
   }
 }
 

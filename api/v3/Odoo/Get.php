@@ -30,11 +30,16 @@ function civicrm_api3_odoo_get($params) {
   $connector = CRM_Odoosync_Connector::singleton();
   $returnValues = array();
   
+  $type = 'string';
+  if (isset($params['type'])) {
+    $type = $params['type'];
+  }
+  
   $key = array(
     new xmlrpcval(array(
       new xmlrpcval($params['attribute'], 'string'),
       new xmlrpcval($params['operator'], 'string'),
-      new xmlrpcval($params['value'], 'string'),
+      new xmlrpcval($params['value'], $type),
     ), "array")
   );
   

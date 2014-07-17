@@ -22,7 +22,7 @@ interface CRM_Odoosync_Model_ObjectDefinitionInterface {
    * e.g. a civicrm_contact should be synced before a civicrm_address
    * 
    */
-  public function getWeight();
+  public function getWeight($action);
   
   /**
    * Returns the synchronisator for this entity

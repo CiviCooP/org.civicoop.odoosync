@@ -22,7 +22,10 @@ Class CRM_OdooContactSync_PhoneDefinition extends CRM_Odoosync_Model_ObjectDefin
     return 'CRM_OdooContactSync_PhoneSynchronisator';
   }
   
-  public function getWeight() {
+  public function getWeight($action) {
+    if ($action == 'DELETE') {
+      return -10;
+    }
     return 0;
   }
   

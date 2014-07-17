@@ -22,7 +22,10 @@ Class CRM_OdooContactSync_AddressDefinition extends CRM_Odoosync_Model_ObjectDef
     return 'CRM_OdooContactSync_AddressSynchronisator';
   }
   
-  public function getWeight() {
+  public function getWeight($action) {
+    if ($action == 'DELETE') {
+      return -10;
+    }
     return 0;
   }
   
