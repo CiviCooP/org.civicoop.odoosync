@@ -135,7 +135,7 @@ class CRM_OdooContactSync_EmailSynchronisator extends CRM_Odoosync_Model_ObjectS
       'email' => new xmlrpcval($email['email'], 'string'),
     );
     
-    $this->alterOdooParameters($parameters, $entity, $entity_id, $action);
+    $this->alterOdooParameters($parameters, $this->getOdooResourceType(), $entity, $entity_id, $action);
     
     return $parameters;
   }

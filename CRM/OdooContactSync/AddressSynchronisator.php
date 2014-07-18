@@ -139,7 +139,7 @@ class CRM_OdooContactSync_AddressSynchronisator extends CRM_Odoosync_Model_Objec
     $state_id = $this->findOdooStateId($address['state_province_id'], $address['country_id']);
     $parameters['state_id'] = new xmlrpcval($state_id, 'int');
     
-    $this->alterOdooParameters($parameters, $entity, $entity_id, $action);
+    $this->alterOdooParameters($parameters, $this->getOdooResourceType(), $entity, $entity_id, $action);
     
     return $parameters;
   }

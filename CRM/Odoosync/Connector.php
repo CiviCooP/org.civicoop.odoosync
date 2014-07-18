@@ -183,6 +183,30 @@ class CRM_Odoosync_Connector {
     return $resp->value()->scalarval();
   }
   
+  public function exec_workflow($resource, $method, $id) {
+    $server_url = $this->config->getUrl();
+
+    $client = new xmlrpc_client($server_url . 'object');
+    $msg = new xmlrpcmsg('exec_workflow');
+    $msg->addParam(new xmlrpcval($this->config->getDatabasename(), "string"));
+    $msg->addParam(new xmlrpcval($this->getUserId(), "int"));
+    $msg->addParam(new xmlrpcval($this->config->getPassword(), "string"));
+    $msg->addParam(new xmlrpcval($resource, "string"));
+    $msg->addParam(new xmlrpcval($method, "string"));
+    $msg->addParam(new xmlrpcval($id, "int"));
+
+    $resp = $client->send($msg);
+    $this->setLastResponse($resp);
+
+    if ($resp->faultCode()) {
+      $this->log('Error creating a '.$resource.': '.$resp->faultCode(). ' (' . $resp->faultString().') with raw response: '.$resp->raw_data);
+      return false;
+    }
+    
+    return $resp->value()->scalarval();
+  }
+  
+  
   protected function setLastResponse($response) {
     $this->lastResponse = $response;
   }

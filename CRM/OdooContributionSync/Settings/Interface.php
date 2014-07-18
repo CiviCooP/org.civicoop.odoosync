@@ -29,5 +29,26 @@ interface CRM_OdooContributionSync_Settings_Interface {
    */
   public function getCompanyId();
   
+  /**
+   * Returns the account ID on which the invoice is booked
+   * 
+   * E.g. returns id 8: for account  110200 Debiteuren
+   * @return int
+   */
+  public function getAccountId();
+  
+  /**
+   * Returns the Odoo tax id for an invoice line
+   * 
+   * @return int
+   */
+  public function getTaxId();
+  
+  /**
+   * Returns the product ID for this contribution
+   * 
+   */
+  public function getProductId();
+  
 }
 

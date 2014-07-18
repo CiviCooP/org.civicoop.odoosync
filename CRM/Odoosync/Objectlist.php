@@ -161,6 +161,7 @@ class CRM_Odoosync_Objectlist {
           3 => array($dao->id, 'Integer')
         ));
       } else {
+        $action = $dao->action;
         $weightToUse = ($objectDef->getWeight($dao->action) < $weight) ? $objectDef->getWeight($dao->action) : $weight;
         $sql = "UPDATE `civicrm_odoo_entity` SET `weight` = %1 WHERE `id` = %2";
         CRM_Core_DAO::executeQuery($sql, array(

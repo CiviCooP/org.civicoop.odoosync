@@ -138,7 +138,7 @@ class CRM_OdooContactSync_PhoneSynchronisator extends CRM_Odoosync_Model_ObjectS
       $parameters[$field] = new xmlrpcval($phone['phone'], 'string');
     }
     
-    $this->alterOdooParameters($parameters, $entity, $entity_id, $action);
+    $this->alterOdooParameters($parameters, $this->getOdooResourceType(), $entity, $entity_id, $action);
     
     return $parameters;
   }

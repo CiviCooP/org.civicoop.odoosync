@@ -29,8 +29,25 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
     $contribution = $this->getContribution($sync_entity->getEntityId());
     $partner_id = $sync_entity->findOdooIdByEntity('civicrm_contact', $contribution['contact_id']);
     $parameters = $this->getOdooParameters($contribution, $partner_id, $sync_entity->getEntity(), $sync_entity->getEntityId(), 'create');
-    
-    throw new exception('to be implemented');
+    $invoice_id = $this->connector->create($this->getOdooResourceType(), $parameters);
+    if ($invoice_id) {
+      $odoo_line_id = $this->addInvoiceLine($contribution, $invoice_id, $sync_entity->getEntity(), $sync_entity->getEntityId(), 'create');
+      if ($odoo_line_id === false) {
+        //remove the invoice because we could not add the invoice line to the invoice
+        $this->connector->unlink($this->getOdooResourceType(), $invoice_id);
+        throw new exception('Could not create invoice line');
+      }
+      //confirm invoice and set sate to open
+      $result = $this->connector->exec_workflow($this->getOdooResourceType(), 'open', $invoice_id);
+      if (!$result) {
+        $this->connector->unlink($this->getOdooResourceType(), $invoice_id);
+        throw new exception('Could not open invoice');
+      }
+      
+      //invoice has the state open and confirmed
+      return $invoice_id;
+    }
+    throw new exception('Could not create invoice');
   }
   
   /**
@@ -79,22 +96,65 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
    * @return \xmlrpcval
    */
   protected function getOdooParameters($contribution, $partner_id, $entity, $entity_id, $action) {
+    $utils = CRM_OdooContributionSync_Utils::singleton();
     $settings = CRM_OdooContributionSync_Factory::getSettingsForContribution($contribution);
+    
     $parameters = array();
     $parameters['journal_id'] = new xmlrpcval($settings->getJournalId(), 'int');
+    $parameters['account_id'] = new xmlrpcval($settings->getAccountId(), 'int');
     $parameters['partner_id'] = new xmlrpcval($partner_id, 'int');
-    $parameters['partner_id'] = new xmlrpcval($settings->getReference(), 'string');
+    $parameters['reference'] = new xmlrpcval($settings->getReference(), 'string');
     $parameters['company_id'] = new xmlrpcval($settings->getCompanyId(), 'int');
+    
+    //set currency
+    if (isset($contribution['currency'])) {
+      $currency_id = $utils->getOdooCurrencyIdByCode($contribution['currency']);
+      $parameters['currency_id'] = new xmlrpcval($currency_id, 'int');
+    }
+    
+    //set date
     $contrDate = new DateTime($contribution['receive_date']);
-    $parameters['date_invoice'] = new xmlrpcval($contrDate->format('Y-m-d') ,'dateTime.iso8601');
+    $parameters['date_invoice'] = new xmlrpcval($contrDate->format('Y-m-d') ,'string');
     
-    //add the invoice lines
-    $invoice_lines = array();
-    $parameters['invoice_lines'] = new xmlrpcval($invoice_lines, $invoice_lines);
-    
-    $this->alterOdooParameters($parameters, $entity, $entity_id, $action);
+    $this->alterOdooParameters($parameters, $this->getOdooResourceType(), $entity, $entity_id, $action);
     
     return $parameters;
+  }
+  
+  protected function addInvoiceLine($contribution, $invoice_id, $entity, $entity_id, $action) {
+    $resource = 'account.invoice.line';
+    $settings = CRM_OdooContributionSync_Factory::getSettingsForContribution($contribution);
+
+    $line = array();
+    $line['quantity'] = new xmlrpcval(1, 'int');
+    
+    //Create a many2many for the tax option
+    //(6, 0, [IDs])          replace the list of linked IDs 
+    //                      (like using (5) then (4,ID) 
+    //                      for each ID in the list of IDs)
+    // 
+    //See also https://doc.odoo.com/v6.0/developer/2_5_Objects_Fields_Methods/methods.html/#osv.osv.osv.write
+    $tax = array(new xmlrpcval(array(
+            new xmlrpcval(6, "int"),// 6 : id link
+            new xmlrpcval(0, "int"), 
+            new xmlrpcval(array(new xmlrpcval($settings->getTaxId(), "int")),"array")
+            ),
+        "array" ));
+    
+    $line['invoice_line_tax_id'] = new xmlrpcval($tax, 'array');
+    $line['name'] = new xmlrpcval($settings->getReference(), 'string');
+    $line['price_unit'] = new xmlrpcval($contribution['total_amount'], 'double');
+    $line['product_id'] = new xmlrpcval($settings->getProductId(), 'int'); //do we need product id?
+    $line['invoice_id'] = new xmlrpcval($invoice_id, 'int');
+    
+    $this->alterOdooParameters($line, $resource, $entity, $entity_id, $action);
+    
+    $odoo_id = $this->connector->create($resource, $line);
+    if ($odoo_id) {
+      return $odoo_id;
+    }
+    var_dump($this->connector->getLastResponseMessage());
+    return false;
   }
  
   protected function getContribution($entity_id) {

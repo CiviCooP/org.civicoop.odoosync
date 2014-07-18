@@ -97,7 +97,7 @@ class CRM_OdooContactSync_ContactSynchronisator extends CRM_Odoosync_Model_Objec
       'is_company' => new xmlrpcval($contact['contact_type'] != 'Individual' ? true : false, 'boolean'),
     );
     
-    $this->alterOdooParameters($parameters, $entity, $entity_id, $action);
+    $this->alterOdooParameters($parameters, $this->getOdooResourceType(), $entity, $entity_id, $action);
     
     return $parameters;
   }
