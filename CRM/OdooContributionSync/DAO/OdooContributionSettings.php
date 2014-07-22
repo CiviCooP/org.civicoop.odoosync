@@ -32,7 +32,7 @@ class CRM_OdooContributionSync_DAO_OdooContributionSettings extends CRM_Core_DAO
           'required' => true,
         ),
         'label' => array(
-          'name' => 'subject',
+          'name' => 'label',
           'type' => CRM_Utils_Type::T_STRING,
           'required' => true,
           'maxlength' => 255,

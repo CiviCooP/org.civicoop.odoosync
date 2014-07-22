@@ -110,11 +110,19 @@ class CRM_OdooContributionSync_Form_OdooContributionSync extends CRM_Core_Form {
    */
   public function postProcess() {
     if ($this->_action & CRM_Core_Action::DELETE) {
-      throw new exception('no delete function build');
+      CRM_OdooContributionSync_BAO_OdooContributionSettings::del($this->_id);
+      CRM_Core_Session::setStatus(ts('Selected setting has been deleted.'), ts('Deleted'), 'success');
       return;
     }
     
-    throw new exception('no save function build');
+    $values = $this->controller->exportValues($this->_name);
+    
+    if ($this->_action & CRM_Core_Action::UPDATE) {
+      CRM_OdooContributionSync_BAO_OdooContributionSettings::edit($values, $this->_id);
+    } elseif ($this->_action & CRM_Core_Action::ADD) {
+      CRM_OdooContributionSync_BAO_OdooContributionSettings::create($values);
+    }
+    
   }
   
   protected function getFinancialTypes() {

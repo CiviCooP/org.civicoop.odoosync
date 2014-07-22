@@ -9,6 +9,12 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
     if (isset($contribution['is_test']) && $contribution['is_test']) {
       return false;
     }
+    
+    $settings = CRM_OdooContributionSync_Factory::getSettingsForContribution($contribution);
+    if ($settings === false) {
+      return false;
+    }
+    
     return true;
   }
   
@@ -41,12 +47,9 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
         $this->connector->unlink($this->getOdooResourceType(), $invoice_id);
         throw new exception('Could not create invoice line');
       }
+      
       //confirm invoice and set sate to open
-      $result = $this->connector->exec_workflow($this->getOdooResourceType(), 'open', $invoice_id);
-      if (!$result) {
-        $this->connector->unlink($this->getOdooResourceType(), $invoice_id);
-        throw new exception('Could not open invoice');
-      }
+      $result = $this->connector->exec_workflow($this->getOdooResourceType(), 'invoice_open', $invoice_id);
       
       //invoice has the state open and confirmed
       return $invoice_id;

@@ -36,5 +36,55 @@ class CRM_OdooContributionSync_BAO_OdooContributionSettings extends CRM_OdooCont
     return '';
   }
   
+  static function create($values) {
+    $dao = new CRM_OdooContributionSync_BAO_OdooContributionSettings();
+    $dao->copyValues($values);
+    $dao->save();
+  }
+
+  static function edit($values, $id) {
+    $dao = new CRM_OdooContributionSync_BAO_OdooContributionSettings();
+    $dao->id = $id;
+    if ($dao->find(TRUE)) {
+      $dao->copyValues($values);
+      $dao->save();
+    }
+  }
+  
+  static function del($id) {
+    if (!$id) {
+      CRM_Core_Error::fatal(ts('Invalid value passed to delete function'));
+    }
+
+    $dao = new CRM_OdooContributionSync_BAO_OdooContributionSettings();
+    $dao->id = $id;
+    if (!$dao->find(TRUE)) {
+      return NULL;
+    }
+    $dao->delete();
+  }
+  
+  static function getSettings($selectArr = NULL, $filter = NULL, $orderBy = 'id') {
+    $settings = array();
+    $temp      = array();
+    $dao       = new CRM_OdooContributionSync_DAO_OdooContributionSettings();
+    if ($filter && is_array($filter)) {
+      foreach ($filter as $key => $value) {
+        $dao->$key = $value;
+      }
+    }
+    if ($selectArr && is_array($selectArr)) {
+      $select = implode(',', $selectArr);
+      $dao->selectAdd($select);
+    }
+    $dao->orderBy($orderBy);
+    $dao->find();
+    while ($dao->fetch()) {
+      CRM_Core_DAO::storeValues($dao, $temp);
+      $settings[] = $temp;
+    }
+    return $settings;
+  }
+  
 }
 

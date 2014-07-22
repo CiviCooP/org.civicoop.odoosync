@@ -94,7 +94,7 @@ class CRM_OdooContributionSync_Page_OdooContributionSync extends CRM_Core_Page_B
     $products = $utils->getAvailableProducts();
     $taxes = $utils->getAvailableTaxes();
     
-    $settings = array();
+    $settings = CRM_OdooContributionSync_BAO_OdooContributionSettings::getSettings();
     
     $rows = array();
     foreach ($settings as $setting) {

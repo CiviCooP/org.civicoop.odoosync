@@ -28,14 +28,14 @@
                 <th >{ts}Action{/ts}</th>
             </tr>
             {foreach from=$rows item=row}
-                <tr id="row_{$row.id}" class="crm-autoreply {cycle values="odd-row,even-row"} {$row.class}{if NOT $row.is_active} disabled{/if}">
-                    <td class="crm-autoreply-label">{$row.label}</td>
-                    <td class="crm-autoreply-financial_type">{$row.financial_type_id}</td>
-                    <td class="crm-autoreply-company_id">{$row.company_id}</td>
-                    <td class="crm-autoreply-journal_id">{$row.journal_id}</td>
-                    <td class="crm-autoreply-account_id">{$row.account_id}</td>
-                    <td class="crm-autoreply-product_id">{$row.product_id}</td>
-                    <td class="crm-autoreply-tax_id">{$row.tax_id}</td>
+                <tr id="row_{$row.id}" class="crm-odoo_contribution_setting {cycle values="odd-row,even-row"} {$row.class}">
+                    <td class="crm-odoo_contribution_setting-label">{$row.label}</td>
+                    <td class="crm-odoo_contribution_setting-financial_type">{$row.financial_type_id}</td>
+                    <td class="crm-odoo_contribution_setting-company_id">{$row.company_id}</td>
+                    <td class="crm-odoo_contribution_setting-journal_id">{$row.journal_id}</td>
+                    <td class="crm-odoo_contribution_setting-account_id">{$row.account_id}</td>
+                    <td class="crm-odoo_contribution_setting-product_id">{$row.product_id}</td>
+                    <td class="crm-odoo_contribution_setting-tax_id">{$row.tax_id}</td>
                     <td>{$row.action|replace:'xx':$row.id}</td>
                 </tr>
             {/foreach}
