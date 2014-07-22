@@ -240,6 +240,7 @@ function _odoosync_civix_insert_navigation_menu(&$menu, $path, $item, $parentId 
     $menu[$navId] = array (
       'attributes' => array_merge($item, array(
         'label'      => CRM_Utils_Array::value('name', $item),
+        'label'      => CRM_Utils_Array::value('label', $item),
         'active'     => 1,
         'parentID'   => $parentId,
         'navID'      => $navId,

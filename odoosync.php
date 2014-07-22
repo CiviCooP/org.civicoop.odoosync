@@ -33,12 +33,69 @@ function odoosync_civicrm_post($op,$objectName, $objectId, &$objectRef) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_navigationMenu
  */
 function odoosync_civicrm_navigationMenu( &$params ) {  
-  $item = array (
-    "name"=> ts('Odoo (OpenERP)'),
+  
+  $item = array(
+    "name" => 'odoo_admin',
+    "label" => ts("Odoo (OpenERP)"),
+    "permission" => "administer CiviCRM",
+  );
+  _odoosync_insert_navigation_menu($params, "Administer", $item);
+  
+  $item_settings = array (
+    "name"=> 'odoo_settings',
+    "label"=> ts('Settings'),
     "url"=> "civicrm/admin/odoo",
     "permission" => "administer CiviCRM",
   );
-  _odoosync_civix_insert_navigation_menu($params, "Administer/System Settings", $item);
+  _odoosync_insert_navigation_menu($params, "Administer/odoo_admin", $item_settings);
+  $item_contribution = array (
+    "name"=> 'odoo_contribution_settings',
+    "label"=> ts('Contribution settings'),
+    "url"=> "civicrm/admin/odoo/contribution",
+    "permission" => "administer CiviCRM",
+  );
+  
+  _odoosync_insert_navigation_menu($params, "Administer/odoo_admin", $item_contribution);
+}
+
+/**
+ * Inserts a navigation menu item at a given place in the hierarchy
+ *
+ * $menu - menu hierarchy
+ * $path - path where insertion should happen (ie. Administer/System Settings)
+ * $item - menu you need to insert (parent/child attributes will be filled for you)
+ * $parentId - used internally to recurse in the menu structure
+ */
+function _odoosync_insert_navigation_menu(&$menu, $path, $item, $parentId = NULL) {
+  static $navId;
+
+  // If we are done going down the path, insert menu
+  if (empty($path)) {
+    if (!$navId) $navId = CRM_Core_DAO::singleValueQuery("SELECT max(id) FROM civicrm_navigation");
+    $navId ++;
+    $menu[$navId] = array (
+      'attributes' => array_merge($item, array(
+        'name'      => CRM_Utils_Array::value('name', $item),
+        'label'      => CRM_Utils_Array::value('label', $item),
+        'active'     => 1,
+        'parentID'   => $parentId,
+        'navID'      => $navId,
+      ))
+    );
+    return true;
+  } else {
+    // Find an recurse into the next level down
+    $found = false;
+    $path = explode('/', $path);
+    $first = array_shift($path);
+    foreach ($menu as $key => &$entry) {
+      if ($entry['attributes']['name'] == $first) {
+        if (!$entry['child']) $entry['child'] = array();
+        $found = _odoosync_insert_navigation_menu($entry['child'], implode('/', $path), $item, $key);
+      }
+    }
+    return $found;
+  }
 }
 
 /**

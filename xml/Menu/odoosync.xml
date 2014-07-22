@@ -3,7 +3,13 @@
   <item>
     <path>civicrm/admin/odoo</path>
     <page_callback>CRM_Odoosync_Form_AdminOdoo</page_callback>
-    <title>AdminOdoo</title>
+    <title>Odoo settings</title>
+    <access_arguments>administer CiviCRM</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/admin/odoo/contribution</path>
+    <page_callback>CRM_OdooContributionSync_Page_OdooContributionSync</page_callback>
+    <title>Odoo Contribution settings</title>
     <access_arguments>administer CiviCRM</access_arguments>
   </item>
 </menu>

@@ -79,6 +79,11 @@ class CRM_Odoosync_Form_AdminOdoo extends CRM_Core_Form {
     
     CRM_Core_Session::setStatus(ts('Saved Odoo settings'), ts('Odoo settings'), 'success');
     
+    $connector = CRM_Odoosync_Connector::singleton();
+    if ($connector->getUserId() === false) {
+      CRM_Core_Session::setStatus(ts('Could not connect to Odoo. Did you provide the right settings?'), 'Problem connecting to Odoo', 'error');
+    }
+    
     parent::postProcess();
   }
 

@@ -5,6 +5,10 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
   protected $_contributionCache = array();
   
   public function isThisItemSyncable(CRM_Odoosync_Model_OdooEntity $sync_entity) {
+    $contribution = $this->getContribution($sync_entity->getEntityId());
+    if (isset($contribution['is_test']) && $contribution['is_test']) {
+      return false;
+    }
     return true;
   }
   

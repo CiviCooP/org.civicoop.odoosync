@@ -12,6 +12,16 @@ class CRM_OdooContributionSync_Utils {
   
   private $odooCurrencyIds = array();
   
+  private $companies = false;
+  
+  private $journals = false;
+  
+  private $accounts = false;
+  
+  private $products = false;
+  
+  private $taxes = false;
+  
   private function __construct() {
     $this->connector = CRM_Odoosync_Connector::singleton();
   }
@@ -53,9 +63,62 @@ class CRM_OdooContributionSync_Utils {
       }
     }
     
-    
     return $this->odooCurrencyIds[$code];
   }
-
+  
+  public function getAvailableCompanies() {
+    if ($this->companies === false) {
+      $this->companies = $this->loadOptions('res.company', 'name');
+    }
+   return $this->companies; 
+  }
+  
+  public function getAvailableJournals() {
+    if ($this->journals === false) {
+      $this->journals = $this->loadOptions('account.journal', 'name');
+    }
+   return $this->journals; 
+  }
+  
+  public function getAvailableTaxes() {
+    if ($this->taxes === false) {
+      $this->taxes = $this->loadOptions('account.tax', 'name');
+    }
+   return $this->taxes; 
+  }
+  
+  public function getAvailableAccounts() {
+    if ($this->accounts === false) {
+      $this->accounts = $this->loadOptions('account.account', array('code', 'name'));
+    }
+   return $this->accounts; 
+  }
+  
+  public function getAvailableProducts() {
+    if ($this->products === false) {
+      $this->products = $this->loadOptions('product.product', 'name');
+    }
+   return $this->products; 
+  }
+  
+  private function loadOptions($resource, $name_parameter) {
+    $list = array();
+    $ids = $this->connector->search($resource, array());
+    $objects = $this->connector->read($resource, $ids);
+    foreach($objects as $object_res) {
+      $object = $object_res->scalarval();
+      if (is_array($name_parameter)) {
+        $name = '';
+        foreach($name_parameter as $name_param) {
+          $name .= ' '. $object[$name_param]->scalarval();
+        }
+        $name = trim($name);
+      } else {
+        $name = $object[$name_parameter]->scalarval();
+      }
+      $list[$object['id']->scalarval()] = $name;
+    }
+    return $list;
+  }
 }
 

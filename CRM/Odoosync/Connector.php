@@ -102,7 +102,11 @@ class CRM_Odoosync_Connector {
     $msg->addParam(new xmlrpcval($this->config->getPassword(), "string"));
     $msg->addParam(new xmlrpcval($resource, "string"));
     $msg->addParam(new xmlrpcval("read", "string"));
-    $msg->addParam(new xmlrpcval($id, "int"));
+    if (is_array($id)) {
+      $msg->addParam(new xmlrpcval($id, "array"));
+    } else {
+      $msg->addParam(new xmlrpcval($id, "int"));
+    }
 
     $resp = $client->send($msg);
     $this->setLastResponse($resp);
