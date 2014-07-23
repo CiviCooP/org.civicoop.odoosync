@@ -81,7 +81,7 @@ class CRM_OdooContributionSync_Form_OdooContributionSync extends CRM_Core_Form {
     $this->add('select', 'financial_type_id', ts('Financial Type'), $financialTypes, FALSE);
     $this->add('select', 'company_id', ts('Company'), $companies, FALSE);
     $this->add('select', 'journal_id', ts('Journal'), $journals, FALSE);
-    $this->add('select', 'account_id', ts('Account'), $accounts, FALSE);
+    $this->add('select', 'account_id', ts('Debtor Account'), $accounts, FALSE);
     $this->add('select', 'product_id', ts('Product'), $products, FALSE);
     $this->add('select', 'tax_id', ts('Tax'), $taxes, FALSE);
   }

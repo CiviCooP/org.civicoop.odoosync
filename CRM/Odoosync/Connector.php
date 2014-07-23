@@ -129,7 +129,11 @@ class CRM_Odoosync_Connector {
     $msg->addParam(new xmlrpcval($this->config->getPassword(), "string"));
     $msg->addParam(new xmlrpcval($resource, "string"));
     $msg->addParam(new xmlrpcval("write", "string"));
-    $msg->addParam(new xmlrpcval($id, "int"));
+    if (is_array($id)) {
+      $msg->addParam(new xmlrpcval($id, "array"));
+    } else {
+      $msg->addParam(new xmlrpcval($id, "int"));
+    }
     $msg->addParam(new xmlrpcval($parameters, "struct"));
 
     $resp = $client->send($msg);

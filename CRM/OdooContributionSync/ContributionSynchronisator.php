@@ -7,11 +7,21 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
   public function isThisItemSyncable(CRM_Odoosync_Model_OdooEntity $sync_entity) {
     $contribution = $this->getContribution($sync_entity->getEntityId());
     if (isset($contribution['is_test']) && $contribution['is_test']) {
+      try {
+        $this->credit($sync_entity->getOdooId(), $sync_entity);
+      } catch (Exception $ex) {
+        //do nothing
+      }
       return false;
     }
     
     $settings = CRM_OdooContributionSync_Factory::getSettingsForContribution($contribution);
     if ($settings === false) {
+      try {
+        $this->credit($sync_entity->getOdooId(), $sync_entity);
+      } catch (Exception $ex) {
+        //do nothing
+      }     
       return false;
     }
     
@@ -37,6 +47,33 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
    */
   public function performInsert(CRM_Odoosync_Model_OdooEntity $sync_entity) {
     $contribution = $this->getContribution($sync_entity->getEntityId());
+    $invoice_id = $this->createInvoice($contribution, $sync_entity);
+    if ($invoice_id) {      
+      //invoice has the state open and confirmed
+      return $invoice_id;
+    }
+    throw new exception('Could not create invoice');
+  }
+  
+  /**
+   * Update an existing contact in Odoo
+   * 
+   * @param type $odoo_id
+   * @param CRM_Odoosync_Model_OdooEntity $sync_entit
+   */
+  public function performUpdate($odoo_id, CRM_Odoosync_Model_OdooEntity $sync_entity) {    
+    $contribution = $this->getContribution($sync_entity->getEntityId());
+    $invoice_id = $this->createInvoice($contribution, $sync_entity);
+    if ($invoice_id) {
+      //credit previous invoice
+      $this->credit($odoo_id, $sync_entity);
+      $sync_entity->setOdooField('');
+      return $invoice_id;
+    }
+    throw new exception('Could not update invoice');
+  }
+  
+  protected function createInvoice($contribution, CRM_Odoosync_Model_OdooEntity $sync_entity) {
     $partner_id = $sync_entity->findOdooIdByEntity('civicrm_contact', $contribution['contact_id']);
     $parameters = $this->getOdooParameters($contribution, $partner_id, $sync_entity->getEntity(), $sync_entity->getEntityId(), 'create');
     $invoice_id = $this->connector->create($this->getOdooResourceType(), $parameters);
@@ -51,30 +88,41 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
       //confirm invoice and set sate to open
       $result = $this->connector->exec_workflow($this->getOdooResourceType(), 'invoice_open', $invoice_id);
       
-      //invoice has the state open and confirmed
       return $invoice_id;
     }
-    throw new exception('Could not create invoice');
+    throw new Exception('Could not create invoice');
   }
   
   /**
-   * Update an existing contact in Odoo
-   * 
-   * @param type $odoo_id
-   * @param CRM_Odoosync_Model_OdooEntity $sync_entit
-   */
-  public function performUpdate($odoo_id, CRM_Odoosync_Model_OdooEntity $sync_entity) {
-    throw new Exception('To be implemented');
-  }
-  
-  /**
-   * Delete contact from Odoo
+   * Delete contribution from Odoo by creating a refund
    * 
    * @param type $odoo_id
    * @param CRM_Odoosync_Model_OdooEntity $sync_entity
    */
   public function performDelete($odoo_id, CRM_Odoosync_Model_OdooEntity $sync_entity) {
-    throw new Exception('To be implemented');
+    if ($odoo_id) {
+      $this->credit($odoo_id, $sync_entity);
+    }
+  }
+  
+  /**
+   * Create a credit invoice for an existing invoice in Odoo
+   * 
+   * @param type $odoo_id
+   */
+  protected function credit($invoice_id, CRM_Odoosync_Model_OdooEntity $sync_entity) {
+    if (!$invoice_id) {
+      return false;
+    }
+    if ($sync_entity->getOdooField() != 'refunded') {
+      $credit = new CRM_OdooContributionSync_CreditInvoice();
+      $result = $credit->credit($invoice_id, $sync_entity->getChangeDate());
+      if ($result) {
+        $sync_entity->setOdooField('refunded');
+      }
+      return $result;
+    }
+    return true;
   }
   
   /**
@@ -160,7 +208,6 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
     if ($odoo_id) {
       return $odoo_id;
     }
-    var_dump($this->connector->getLastResponseMessage());
     return false;
   }
  

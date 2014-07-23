@@ -101,6 +101,44 @@ class CRM_OdooContributionSync_Utils {
    return $this->products; 
   }
   
+  public function getCreditJournalId() {
+    $keys = array(
+        new xmlrpcval(array(
+          new xmlrpcval('type', 'string'),
+          new xmlrpcval('=', 'string'),
+          new xmlrpcval('sale_refund', 'string'),
+            ), "array"),
+      );
+    $ids = $this->connector->search('account.journal', $keys);
+    $id = reset($ids);
+    if ($id) {
+      return $id->scalarval();
+    }
+    
+    return false;
+  }
+  
+  public function getMoveLineToAccount($account_id, $move_id) {
+    $keys = array(
+        new xmlrpcval(array(
+          new xmlrpcval('move_id', 'string'),
+          new xmlrpcval('=', 'string'),
+          new xmlrpcval($move_id, 'int'),
+        ), "array"),
+        new xmlrpcval(array(
+          new xmlrpcval('account_id', 'string'),
+          new xmlrpcval('=', 'string'),
+          new xmlrpcval($account_id, 'int'),
+        ), "array"),
+      );
+    $debtor_move_line_ids = $this->connector->search('account.move.line', $keys);
+    if ($debtor_move_line_ids === false) {
+      return false;
+    }
+    $debtor_move_line_id = reset($debtor_move_line_ids);
+    return $debtor_move_line_id->scalarval();
+  }
+  
   private function loadOptions($resource, $name_parameter) {
     $list = array();
     $ids = $this->connector->search($resource, array());

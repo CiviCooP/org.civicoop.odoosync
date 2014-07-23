@@ -18,6 +18,8 @@ class CRM_Odoosync_Model_OdooEntity {
   
   protected $status;
   
+  protected $change_date;
+  
   public function __construct(CRM_Core_DAO $dao) {
     $this->id = $dao->id;
     $this->entity = $dao->entity;
@@ -27,6 +29,7 @@ class CRM_Odoosync_Model_OdooEntity {
     $this->odoo_field = (!empty($dao->odoo_field)) ? $dao->odoo_field : '';
     $this->status = $dao->status;    
     $this->action = $dao->action;
+    $this->change_date = new DateTime($dao->change_date);
   }
   
   public function getId() {
@@ -47,6 +50,10 @@ class CRM_Odoosync_Model_OdooEntity {
   
   public function getOdooField() {
     return $this->odoo_field;
+  }
+  
+  public function getChangeDate() {
+    return $this->change_date;
   }
   
   public function setOdooField($field) {
