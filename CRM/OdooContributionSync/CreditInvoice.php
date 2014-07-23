@@ -20,17 +20,19 @@ class CRM_OdooContributionSync_CreditInvoice {
 
     $refund_invoice = $this->connector->read('account.invoice', $refund_invoice_id);
     
-    if (!$this->reconcile($invoice, $refund_invoice)) {
-      return false; //do not throw an exception, the reconciliation should be done in OpenERP manually
-    }
+    if ($invoice['state']->scalarvalue != 'paid') {
+      if (!$this->reconcile($invoice, $refund_invoice)) {
+        return false; //do not throw an exception, the reconciliation should be done in OpenERP manually
+      }
     
-    //set invoice status to paid
-    $update_paid_ids = array(
-      new xmlrpcval($refund_invoice_id, 'int'), 
-      new xmlrpcval($odoo_invoice_id, 'int')
-    );
-    $update_paid_parameters['state'] = new xmlrpcval('paid', 'string');
-    $this->connector->write('account.invoice', $update_paid_ids, $update_paid_parameters);
+      //set invoice status to paid
+      $update_paid_ids = array(
+        new xmlrpcval($refund_invoice_id, 'int'), 
+        new xmlrpcval($odoo_invoice_id, 'int')
+      );
+      $update_paid_parameters['state'] = new xmlrpcval('paid', 'string');
+      $this->connector->write('account.invoice', $update_paid_ids, $update_paid_parameters);
+    }
     
     return $refund_invoice_id;
   }
