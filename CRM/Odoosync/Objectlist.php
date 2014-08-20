@@ -113,8 +113,16 @@ class CRM_Odoosync_Objectlist {
     
     $this->setProcessedEntity($objectDef->getCiviCRMEntityName(), $objectId);
     
+    //copy to data array
     $data = array();
-    CRM_Core_DAO::storeValues($objectRef, $data);
+    if (is_array($objectRef)) {
+      foreach($objectRef as $key => $value) {
+        $data[$key] = $value;
+      }
+    } else {
+      CRM_Core_DAO::storeValues($objectRef, $data);
+    }
+    
     $this->saveAllDependencies($objectDef, $objectId, $action, $data);
   }
   

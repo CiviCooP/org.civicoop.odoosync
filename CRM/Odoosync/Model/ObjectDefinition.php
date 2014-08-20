@@ -20,5 +20,9 @@ abstract class CRM_Odoosync_Model_ObjectDefinition implements CRM_Odoosync_Model
     return new $hookedClass($this);
   }
   
+  public function getWeight($action) {
+    return 0;
+  }
+  
 }
 

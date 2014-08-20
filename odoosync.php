@@ -27,6 +27,7 @@ function odoosync_civicrm_post($op,$objectName, $objectId, &$objectRef) {
   $objects->post($op,$objectName, $objectId, $objectRef);
 }
 
+
 /**
  * Implementation of hook_civicrm_navigationMenu
  *
