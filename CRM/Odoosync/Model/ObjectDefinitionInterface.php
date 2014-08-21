@@ -38,5 +38,30 @@ interface CRM_Odoosync_Model_ObjectDefinitionInterface {
    */
   public function getName();
   
+  /**
+   * Returns the database table for the object
+   * 
+   * This used to check wether an entity exist in sync queue
+   * 
+   * @return string
+   */
+  public function getTableName();
+  
+  /**
+   * Returns the name of the primary key field
+   * 
+   * This used to check wether an entity exist in sync queue
+   * 
+   * @return string
+   */
+  public function getIdFieldName();
+  
+  /**
+   * Returns an array with civicrm entity data
+   * 
+   * @return array
+   */
+  public function getCiviCRMEntityDataById($id);
+  
 }
 

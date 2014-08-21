@@ -60,6 +60,10 @@ Class CRM_OdooContactSync_PhoneDefinition extends CRM_Odoosync_Model_ObjectDefin
     }
     return $dep;
   }
+  
+  public function getCiviCRMEntityDataById($id) {
+    return civicrm_api3('Phone', 'getsingle', array('id' => $id));
+  }
 }
 
 

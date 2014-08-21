@@ -26,13 +26,45 @@ class CRM_Odoosync_Objectlist {
    * to be synced later on by a background job
    * 
    */
-  public function post($op,$objectName, $objectId, &$objectRef) {
+  public function post($op,$objectName, $objectId) {
     foreach($this->list as $def) {
       if ($def->isObjectNameSupported($objectName)) {
-        $this->saveForSync($op, $objectName, $objectId, $objectRef, $def);
+        $data = array();
+        try {
+          $data = $def->getCiviCRMEntityDataById($objectId);
+        } catch (Exception $e) { 
+          //do nothing
+        }
+        $this->saveForSync($op, $objectId, $data, $def);
         break;
       }
     } 
+  }
+  
+  public function complementSyncQueue($limit=1000) {
+    $itemsToSync = $limit;
+    foreach($this->list as $def) {
+      if ($itemsToSync <= 0) {
+        break;
+      }
+      
+      $table = $def->getTableName();
+      $id = $def->getIdFieldName();
+      $entity = $def->getCiviCRMEntityName();
+      $sql = "SELECT `".$table."`.`".$id."` AS `id` FROM `".$table."` LEFT JOIN `civicrm_odoo_entity` ON `civicrm_odoo_entity`.`entity_id` = `".$table."`.`".$id."` AND `civicrm_odoo_entity`.`entity` = '".$entity."' WHERE `civicrm_odoo_entity`.`id` IS NULL LIMIT ".$itemsToSync;
+      $dao = CRM_Core_DAO::executeQuery($sql);
+      while($dao->fetch()) {
+        $data = array();
+        try {
+          $data = $def->getCiviCRMEntityDataById($objectId);
+        } catch (Exception $e) { 
+          //do nothing
+        }
+        $this->saveForSync('create', $dao->id, $data, $def);
+        
+        $itemsToSync --;
+      }
+    }
   }
   
   /**
@@ -62,7 +94,7 @@ class CRM_Odoosync_Objectlist {
     return false;
   }
   
-  protected function saveForSync($op, $objectName, $objectId, &$objectRef, CRM_Odoosync_Model_ObjectDefinitionInterface $objectDef) {
+  protected function saveForSync($op, $objectId, $data, CRM_Odoosync_Model_ObjectDefinitionInterface $objectDef) {
     $this->resetProcessedEntityList();
     
     //check if entity exist already exist
@@ -112,16 +144,6 @@ class CRM_Odoosync_Objectlist {
     }
     
     $this->setProcessedEntity($objectDef->getCiviCRMEntityName(), $objectId);
-    
-    //copy to data array
-    $data = array();
-    if (is_array($objectRef)) {
-      foreach($objectRef as $key => $value) {
-        $data[$key] = $value;
-      }
-    } else {
-      CRM_Core_DAO::storeValues($objectRef, $data);
-    }
     
     $this->saveAllDependencies($objectDef, $objectId, $action, $data);
   }

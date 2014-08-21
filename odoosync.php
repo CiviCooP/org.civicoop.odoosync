@@ -24,7 +24,7 @@ function odoosync_civicrm_odoo_object_definition(&$list) {
 function odoosync_civicrm_post($op,$objectName, $objectId, &$objectRef) {
   //delegate the post hook to a class
   $objects = CRM_Odoosync_Objectlist::singleton();
-  $objects->post($op,$objectName, $objectId, $objectRef);
+  $objects->post($op,$objectName, $objectId);
 }
 
 

@@ -29,11 +29,10 @@ function civicrm_api3_odoo_getsingle($params) {
   $returnValues = array();
   
   $read = $connector->read($params['resource'], $params['id']);
-  var_dump($read); exit();
   
-  //$returnValues[1]['log'] = $connector->getLog();
+  //what to do with the return values
   
-  return civicrm_api3_create_success($returnValues, $params, 'Odoo', 'Login');
+  return civicrm_api3_create_success($returnValues, $params, 'Odoo', 'getsingle');
   
 }
 

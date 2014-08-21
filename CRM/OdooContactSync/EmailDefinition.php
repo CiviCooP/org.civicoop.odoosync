@@ -67,6 +67,10 @@ Class CRM_OdooContactSync_EmailDefinition extends CRM_Odoosync_Model_ObjectDefin
     }
     return $dep;
   }
+  
+  public function getCiviCRMEntityDataById($id) {
+    return civicrm_api3('Email', 'getsingle', array('id' => $id));
+  }
 }
 
 

@@ -43,6 +43,10 @@ Class CRM_OdooContributionSync_ContributionDefinition extends CRM_Odoosync_Model
     }
     return $dep;
   }
+  
+  public function getCiviCRMEntityDataById($id) {
+    return civicrm_api3('Contribution', 'getsingle', array('id' => $id));
+  }
 }
 
 

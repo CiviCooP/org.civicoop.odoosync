@@ -67,6 +67,10 @@ Class CRM_OdooContactSync_AddressDefinition extends CRM_Odoosync_Model_ObjectDef
     }
     return $dep;
   }
+  
+  public function getCiviCRMEntityDataById($id) {
+    return civicrm_api3('Address', 'getsingle', array('id' => $id));
+  }
 }
 
 

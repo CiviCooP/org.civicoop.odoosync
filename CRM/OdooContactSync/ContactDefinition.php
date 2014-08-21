@@ -33,6 +33,10 @@ Class CRM_OdooContactSync_ContactDefinition extends CRM_Odoosync_Model_ObjectDef
   public function getName() {
     return 'civicrm_contact';
   }
+  
+  public function getCiviCRMEntityDataById($id) {
+    return civicrm_api3('Contact', 'getsingle', array('id' => $id));
+  }
 }
 
 
