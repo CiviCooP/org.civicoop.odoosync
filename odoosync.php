@@ -27,6 +27,26 @@ function odoosync_civicrm_post($op,$objectName, $objectId, &$objectRef) {
   $objects->post($op,$objectName, $objectId);
 }
 
+/** 
+ * Place a link to the partner detail screen in Odoo on the contact card
+ * 
+ * Implementation of hook_civicrm_summary
+ * 
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_summary
+ */
+function odoosync_civicrm_pageRun(&$page) {
+  if ($page instanceof CRM_Contact_Page_View_Summary) {
+    $partnerLink = new CRM_OdooContactSync_PartnerLink($page->getVar('_contactId'));
+    if ($partnerLink->contactIsPartner()) {
+      CRM_Core_Region::instance('page-body')->add(array(
+        'template' => "CRM/Contact/Page/View/Summary/link_to_odoo.tpl"
+      ));
+      $smarty = CRM_Core_Smarty::singleton();
+      $smarty->assign('link_to_odoo', $partnerLink->getLink());
+    }
+  }
+}
+
 
 /**
  * Implementation of hook_civicrm_navigationMenu
