@@ -34,10 +34,7 @@ class CRM_OdooContactSync_PartnerLink {
   }
   
   public function getLink() {
-    $url = $this->config->getUrl();
-    $url = str_replace("/xmlrpc/", "", $url);
-    $url .= "#id=".$this->odoo_id."&view_type=form&model=res.partner&menu_id=79&action=62";
-    return $url;
+    return $this->config->getViewPartnerUrl($this->odoo_id);
   }
   
 } 

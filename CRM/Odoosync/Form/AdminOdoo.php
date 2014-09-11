@@ -46,6 +46,17 @@ class CRM_Odoosync_Form_AdminOdoo extends CRM_Core_Form {
       true // is required
     );
     
+    // add form elements
+    $this->add(
+      'text', // field type
+      'view_partner_url', // field name
+      'View partner URL', // field label
+      array(
+        'size' => CRM_Utils_Type::HUGE,
+      ), //attributes 
+      true // is required
+    );
+    
     $this->addButtons(array(
       array(
         'type' => 'submit',
@@ -66,6 +77,7 @@ class CRM_Odoosync_Form_AdminOdoo extends CRM_Core_Form {
     $values['db_name'] = CRM_Core_BAO_Setting::getItem('org.civicoop.odoosync', 'databasename');
     $values['username'] = CRM_Core_BAO_Setting::getItem('org.civicoop.odoosync', 'username');
     $values['password'] = CRM_Core_BAO_Setting::getItem('org.civicoop.odoosync', 'password');
+    $values['view_partner_url'] = CRM_Core_BAO_Setting::getItem('org.civicoop.odoosync', 'view_partner_url');
     return $values;
   }
 
@@ -76,6 +88,7 @@ class CRM_Odoosync_Form_AdminOdoo extends CRM_Core_Form {
     CRM_Core_BAO_Setting::setItem($values['db_name'], 'org.civicoop.odoosync', 'databasename');
     CRM_Core_BAO_Setting::setItem($values['username'], 'org.civicoop.odoosync', 'username');
     CRM_Core_BAO_Setting::setItem($values['password'], 'org.civicoop.odoosync', 'password');
+    CRM_Core_BAO_Setting::setItem($values['view_partner_url'], 'org.civicoop.odoosync', 'view_partner_url');
     
     CRM_Core_Session::setStatus(ts('Saved Odoo settings'), ts('Odoo settings'), 'success');
     

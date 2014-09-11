@@ -12,6 +12,9 @@
         {if $elementName == 'url'}
         <p class="description">{ts}E.g. http://localhost:8069/xmlrpc/{/ts}</p>
         {/if}
+        {if $elementName == 'view_partner_url'}
+        <p class="description">{ts}{literal}E.g. http://localhost:8069/?db=sp#id={partner_id}&view_type=form&model=res.partner&action=569<br>Use {partner_id} to insert the ID of the partner{/literal}{/ts}</p>
+        {/if}
         {$form.$elementName.html}
     </div>
     <div class="clear"></div>
