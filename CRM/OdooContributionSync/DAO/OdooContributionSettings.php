@@ -68,6 +68,11 @@ class CRM_OdooContributionSync_DAO_OdooContributionSettings extends CRM_Core_DAO
           'type' => CRM_Utils_Type::T_INT,
           'required' => true,
         ),
+        'confirmed' => array(
+          'name' => 'confirmed',
+          'type' => CRM_Utils_Type::T_BOOLEAN,
+          'required' => true,
+        ),
       );
     }
     return self::$_fields;
@@ -91,6 +96,7 @@ class CRM_OdooContributionSync_DAO_OdooContributionSettings extends CRM_Core_DAO
         'account_id' => 'account_id',
         'product_id' => 'product_id',
         'tax_id' => 'tax_id',
+        'confirmed' => 'confirmed'
       );
     }
     return self::$_fieldKeys;

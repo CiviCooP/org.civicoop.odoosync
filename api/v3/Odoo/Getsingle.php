@@ -31,6 +31,7 @@ function civicrm_api3_odoo_getsingle($params) {
   $read = $connector->read($params['resource'], $params['id']);
   
   //what to do with the return values
+  $returnValues[] = $read;
   
   return civicrm_api3_create_success($returnValues, $params, 'Odoo', 'getsingle');
   

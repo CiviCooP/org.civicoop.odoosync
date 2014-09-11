@@ -29,6 +29,9 @@
     <tr class="crm-sms-odoo_contribution_setting-form-block-tax_id">
         <td class="label">{$form.tax_id.label}</td><td>{$form.tax_id.html}</td>
     </tr>
+    <tr class="crm-sms-odoo_contribution_setting-form-block-confirmed">
+        <td class="label">{$form.confirmed.label}</td><td>{$form.confirmed.html}</td>
+    </tr>
   </table>
 {/if} 
 </table>

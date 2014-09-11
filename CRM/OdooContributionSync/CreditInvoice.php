@@ -2,6 +2,10 @@
 
 class CRM_OdooContributionSync_CreditInvoice {
 
+  /**
+   *
+   * @var CRM_Odoosync_Connector
+   */
   protected $connector;
 
   public function __construct() {
@@ -9,18 +13,18 @@ class CRM_OdooContributionSync_CreditInvoice {
   }
 
   public function credit($odoo_invoice_id, DateTime $date) {
-    $invoice = $this->connector->read('account.invoice', $odoo_invoice_id);
+    $invoice = $this->connector->read($this->getOdooResourceType(), $odoo_invoice_id);
 
     $refund_invoice_id = $this->createCreditInvoice($invoice, $date);
     if (!$this->convertInvoiceLineToCreditInvoiceLine($invoice, $refund_invoice_id)) {
       $this->connector->unlink($this->getOdooResourceType(), $refund_invoice_id);
       throw new Exception('Could not convert invoice lines to credit invoice lines');
     }
-    $this->connector->exec_workflow('account.invoice', 'invoice_open', $refund_invoice_id);
+    $this->connector->exec_workflow($this->getOdooResourceType(), 'invoice_open', $refund_invoice_id);
 
-    $refund_invoice = $this->connector->read('account.invoice', $refund_invoice_id);
+    $refund_invoice = $this->connector->read($this->getOdooResourceType(), $refund_invoice_id);
     
-    if ($invoice['state']->scalarvalue != 'paid') {
+    if ($invoice['state']->scalarval() != 'paid') {
       if (!$this->reconcile($invoice, $refund_invoice)) {
         return false; //do not throw an exception, the reconciliation should be done in OpenERP manually
       }
@@ -31,10 +35,14 @@ class CRM_OdooContributionSync_CreditInvoice {
         new xmlrpcval($odoo_invoice_id, 'int')
       );
       $update_paid_parameters['state'] = new xmlrpcval('paid', 'string');
-      $this->connector->write('account.invoice', $update_paid_ids, $update_paid_parameters);
+      $this->connector->write($this->getOdooResourceType(), $update_paid_ids, $update_paid_parameters);
     }
     
     return $refund_invoice_id;
+  }
+  
+  protected function getOdooResourceType() {
+    return 'account.invoice';
   }
 
   protected function reconcile($invoice, $refund_invoice) {
@@ -92,7 +100,7 @@ class CRM_OdooContributionSync_CreditInvoice {
       $line['invoice_line_tax_id'] = new xmlrpcval($tax, 'array');
       $line['name'] = new xmlrpcval($invoice['reference']->scalarval(), 'string');
       $line['price_unit'] = new xmlrpcval($invoice_line['price_unit']->scalarval(), 'double');
-      $line['product_id'] = new xmlrpcval($invoice_line['product_id']->scalarval(), 'int'); //do we need product id?
+      $line['product_id'] = new xmlrpcval($invoice_line['product_id']->arraymem(0)->scalarval(), 'int'); //do we need product id?
       $line['invoice_id'] = new xmlrpcval($refund_invoice_id, 'int');
 
       $refund_line_id = $this->connector->create('account.invoice.line', $line);
@@ -130,7 +138,7 @@ class CRM_OdooContributionSync_CreditInvoice {
       $parameters['currency_id'] = new xmlrpcval($invoice['currency_id']->scalarval(), 'int');
     }
 
-    $credit_invoice_id = $this->connector->create('account.invoice', $parameters);
+    $credit_invoice_id = $this->connector->create($this->getOdooResourceType(), $parameters);
     if ($credit_invoice_id) {
       return $credit_invoice_id;
     }

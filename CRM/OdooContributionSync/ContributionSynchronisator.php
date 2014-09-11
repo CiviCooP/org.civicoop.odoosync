@@ -8,7 +8,7 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
     $contribution = $this->getContribution($sync_entity->getEntityId());
     if (isset($contribution['is_test']) && $contribution['is_test']) {
       try {
-        $this->credit($sync_entity->getOdooId(), $sync_entity);
+        $this->performDelete($sync_entity->getOdooId(), $sync_entity);
       } catch (Exception $ex) {
         //do nothing
       }
@@ -66,7 +66,7 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
     $invoice_id = $this->createInvoice($contribution, $sync_entity);
     if ($invoice_id) {
       //credit previous invoice
-      $this->credit($odoo_id, $sync_entity);
+      $this->performDelete($odoo_id, $sync_entity);
       $sync_entity->setOdooField('');
       return $invoice_id;
     }
@@ -86,7 +86,9 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
       }
       
       //confirm invoice and set sate to open
-      $result = $this->connector->exec_workflow($this->getOdooResourceType(), 'invoice_open', $invoice_id);
+      if ($this->confirmThisInvoice($contribution)) {
+        $this->connector->exec_workflow($this->getOdooResourceType(), 'invoice_open', $invoice_id);
+      }
       
       return $invoice_id;
     }
@@ -101,8 +103,21 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
    */
   public function performDelete($odoo_id, CRM_Odoosync_Model_OdooEntity $sync_entity) {
     if ($odoo_id) {
-      $this->credit($odoo_id, $sync_entity);
+      $deletable = $this->isInvoiceDeletable($odoo_id);
+      if ($deletable) {
+        $this->connector->unlink($this->getOdooResourceType(), $odoo_id);
+      } else {      
+        $this->credit($odoo_id, $sync_entity);
+      }
     }
+  }
+  
+  protected function isInvoiceDeletable($odoo_invoice_id) {
+    $invoice = $this->connector->read('account.invoice', $odoo_invoice_id);
+    if (isset($invoice['state']) && $invoice['state']->scalarval() == 'draft') {
+      return true;
+    }     
+    return false;
   }
   
   /**
@@ -217,6 +232,22 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
     }
     
     return $this->_contributionCache[$entity_id];
+  }
+  
+  /**
+   * Returns whether a new invoice (contribution) 
+   * should be saved as draft (false) or as confirmed (true)
+   * 
+   * Inheritted classes can override this method to determine 
+   * 
+   * @return boolean
+   */
+  protected function confirmThisInvoice($contribution) {
+    $settings = CRM_OdooContributionSync_Factory::getSettingsForContribution($contribution);
+    if ($settings->getConfirmed()) {
+      return true;
+    }
+    return false;
   }
   
 }

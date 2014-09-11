@@ -74,6 +74,7 @@ class CRM_OdooContributionSync_Form_OdooContributionSync extends CRM_Core_Form {
     $accounts = array(' -- '.ts('Select an account').' -- ') + $utils->getAvailableAccounts();
     $products = array(' -- '.ts('Select a product').' -- ') + $utils->getAvailableProducts();
     $taxes = array(' -- '.ts('Select a tax').' -- ') + $utils->getAvailableTaxes();
+    $states = array(0 => ts('Draft'), 1 => ts('Confirmed'));
 
     $this->add('text', 'label', ts('Label'), $attributes['label'], TRUE
     );
@@ -84,6 +85,7 @@ class CRM_OdooContributionSync_Form_OdooContributionSync extends CRM_Core_Form {
     $this->add('select', 'account_id', ts('Debtor Account'), $accounts, FALSE);
     $this->add('select', 'product_id', ts('Product'), $products, FALSE);
     $this->add('select', 'tax_id', ts('Tax'), $taxes, FALSE);
+    $this->add('select', 'confirmed', ts('Invoice state'), $states, FALSE);
   }
 
   function setDefaultValues() {

@@ -29,6 +29,10 @@ class CRM_OdooContributionSync_BAO_OdooContributionSettings extends CRM_OdooCont
     return $this->tax_id;
   }
   
+  public function getConfirmed() {
+    return $this->confirmed;
+  }
+  
   public function getReference() {
     if ($this->contribution && isset($this->contribution['financial_type'])) {
       return $this->contribution['finanial_type'];
