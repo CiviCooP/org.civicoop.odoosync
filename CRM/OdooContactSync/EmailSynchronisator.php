@@ -73,6 +73,12 @@ class CRM_OdooContactSync_EmailSynchronisator extends CRM_Odoosync_Model_ObjectS
     throw new Exception("Could not update partner in Odoo");
   }
   
+  public function getSyncData(\CRM_Odoosync_Model_OdooEntity $sync_entity, $odoo_id) {
+    $email = $this->getEmail($sync_entity->getEntityId());
+    $parameters = $this->getOdooParameters($email, $sync_entity->getEntity(), $sync_entity->getEntityId(), 'write');
+    return $parameters;
+  }
+  
   /**
    * Delete contact from Odoo
    * 

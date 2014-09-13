@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS `civicrm_odoo_entity` (
   `last_error` TEXT NULL ,
   `last_error_date` DATETIME NULL,
   `status` varchar(255) DEFAULT NULL,
+  `data` blob NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 

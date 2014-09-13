@@ -20,6 +20,8 @@ class CRM_Odoosync_Model_OdooEntity {
   
   protected $change_date;
   
+  protected $data;
+  
   public function __construct(CRM_Core_DAO $dao) {
     $this->id = $dao->id;
     $this->entity = $dao->entity;
@@ -30,6 +32,7 @@ class CRM_Odoosync_Model_OdooEntity {
     $this->status = $dao->status;    
     $this->action = $dao->action;
     $this->change_date = new DateTime($dao->change_date);
+    $this->data = $dao->data;
   }
   
   public function getId() {
@@ -58,6 +61,13 @@ class CRM_Odoosync_Model_OdooEntity {
   
   public function setOdooField($field) {
     $this->odoo_field = $field;
+  }
+  
+  public function getData() {
+    if (!empty($this->data)) {
+      return unserialize($this->data);
+    }
+    return false;
   }
   
   public function process($debug = false) {
@@ -104,11 +114,15 @@ class CRM_Odoosync_Model_OdooEntity {
           $this->odoo_id = $synchronisator->performInsert($this);
           $this->odoo_resource = $synchronisator->getOdooResourceType();
           $this->status = "SYNCED";
+          $this->data = serialize($synchronisator->getSyncData($this, $this->odoo_id));
           $this->save();
           break;
         case 'UPDATE':
-          $this->odoo_id = $synchronisator->performUpdate($this->odoo_id, $this);
-          $this->odoo_resource = $synchronisator->getOdooResourceType();
+          if ($this->getData() != $synchronisator->getSyncData($this, $this->odoo_id)) {          
+            $this->odoo_id = $synchronisator->performUpdate($this->odoo_id, $this);
+            $this->odoo_resource = $synchronisator->getOdooResourceType();
+            $this->data = serialize($synchronisator->getSyncData($this, $this->odoo_id));
+          }
           $this->status = "SYNCED";
           $this->save();
           break;
@@ -132,13 +146,14 @@ class CRM_Odoosync_Model_OdooEntity {
   }
   
   private function save() {
-    $sql = "UPDATE `civicrm_odoo_entity` SET `action` = NULL, odoo_resource = %1, odoo_id = %2, `status` = %3, `odoo_field` = %4, `sync_date` = NOW(), `last_error` = NULL, `last_error_date` = NULL WHERE `id` = %5";
+    $sql = "UPDATE `civicrm_odoo_entity` SET `action` = NULL, odoo_resource = %1, odoo_id = %2, `status` = %3, `odoo_field` = %4, `sync_date` = NOW(), `last_error` = NULL, `last_error_date` = NULL, `data` = %5 WHERE `id` = %6";
     CRM_Core_DAO::executeQuery($sql, array(
       1 => array($this->odoo_resource ? $this->odoo_resource : '', 'String'),
       2 => array($this->odoo_id ? $this->odoo_id : -1, 'Integer'),
       3 => array($this->status, 'String'),
       4 => array($this->odoo_field, 'String'),
-      5 => array($this->id, 'Positive'),
+      5 => array($this->data, 'String'),
+      6 => array($this->id, 'Positive'),
     ));
   }
   

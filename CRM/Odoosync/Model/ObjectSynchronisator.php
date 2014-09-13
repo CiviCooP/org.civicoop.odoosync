@@ -15,6 +15,13 @@ abstract class CRM_Odoosync_Model_ObjectSynchronisator {
   abstract public function performUpdate($odoo_id, CRM_Odoosync_Model_OdooEntity $sync_entity);
   
   /**
+   * Returns an array with data to sync
+   * 
+   * @return array;
+   */
+  abstract public function getSyncData(CRM_Odoosync_Model_OdooEntity $sync_entity, $odoo_id);
+  
+  /**
    * Delete an item from Odoo
    * 
    */

@@ -73,6 +73,16 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
     throw new exception('Could not update invoice');
   }
   
+  public function getSyncData(CRM_Odoosync_Model_OdooEntity $sync_entity, $odoo_id) {
+    $contribution = $this->getContribution($sync_entity->getEntityId());
+    $partner_id = $sync_entity->findOdooIdByEntity('civicrm_contact', $contribution['contact_id']);
+    $parameters = $this->getOdooParameters($contribution, $partner_id, $sync_entity->getEntity(), $sync_entity->getEntityId(), 'create');
+    $parameters['lines'] = new xmlrpcval(array(
+      $this->getInvoiceLineParameters($contribution, $odoo_id, $sync_entity->getEntity(), $sync_entity->getEntityId(), 'create')
+    ), 'array');
+    return $parameters;
+  }
+  
   protected function createInvoice($contribution, CRM_Odoosync_Model_OdooEntity $sync_entity) {
     $partner_id = $sync_entity->findOdooIdByEntity('civicrm_contact', $contribution['contact_id']);
     $parameters = $this->getOdooParameters($contribution, $partner_id, $sync_entity->getEntity(), $sync_entity->getEntityId(), 'create');
@@ -193,6 +203,17 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
   
   protected function addInvoiceLine($contribution, $invoice_id, $entity, $entity_id, $action) {
     $resource = 'account.invoice.line';
+    $line = $this->getInvoiceLineParameters($contribution, $invoice_id, $entity, $entity_id, $action);
+    
+    $odoo_id = $this->connector->create($resource, $line);
+    if ($odoo_id) {
+      return $odoo_id;
+    }
+    return false;
+  }
+  
+  protected function getInvoiceLineParameters($contribution, $invoice_id, $entity, $entity_id, $action) {
+    $resource = 'account.invoice.line';
     $settings = CRM_OdooContributionSync_Factory::getSettingsForContribution($contribution);
 
     $line = array();
@@ -219,11 +240,7 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
     
     $this->alterOdooParameters($line, $resource, $entity, $entity_id, $action);
     
-    $odoo_id = $this->connector->create($resource, $line);
-    if ($odoo_id) {
-      return $odoo_id;
-    }
-    return false;
+    return $line;
   }
  
   protected function getContribution($entity_id) {
