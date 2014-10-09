@@ -165,7 +165,7 @@ class CRM_Odoosync_Model_OdooEntity {
     }
     
     //set lock
-    CRM_Core_BAO_Setting::setItem('1', 'org.civicoop.odoosync', 'sync_lock');
+    CRM_Core_BAO_Setting::setItem(time(), 'org.civicoop.odoosync', 'sync_lock');
     
     $sql = "SELECT * FROM `civicrm_odoo_entity`  WHERE `action` IS NOT NULL AND `change_date` IS NOT NULL AND (`sync_date` IS NULL OR `change_date` > `sync_date`) ORDER BY `weight` ASC, `action` ASC, `change_date` ASC LIMIT 0, %1";
     $dao = CRM_Core_DAO::executeQuery($sql, array(1 => array($limit, 'Integer')));
@@ -236,6 +236,11 @@ class CRM_Odoosync_Model_OdooEntity {
   
   public static function unlock() {
     CRM_Core_BAO_Setting::setItem('0', 'org.civicoop.odoosync', 'sync_lock');
+  }
+  
+  public static function getLockTime() {
+    $lock = CRM_Core_BAO_Setting::getItem('org.civicoop.odoosync', 'sync_lock');
+    return $lock;
   }
 }
 
