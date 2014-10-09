@@ -23,10 +23,15 @@ function _civicrm_api3_odoo_sync_spec(&$spec) {
  */
 function civicrm_api3_odoo_sync($params) {
   $returnValues = array();
+  
+  if (!empty($params['unlock'])) {
+    CRM_Odoosync_Model_OdooEntity::unlock();
+  } else {
 
-  $limit = isset($params['limit']) ? $params['limit'] : 1000;
-  $debug = isset($params['debug']) ? true : false;
-  CRM_Odoosync_Model_OdooEntity::sync($limit, $debug);
+    $limit = isset($params['limit']) ? $params['limit'] : 1000;
+    $debug = isset($params['debug']) ? true : false;
+    CRM_Odoosync_Model_OdooEntity::sync($limit, $debug);
+  }
   
   // Spec: civicrm_api3_create_success($values = 1, $params = array(), $entity = NULL, $action = NULL)
   return civicrm_api3_create_success($returnValues, $params, 'Odoo', 'Sync');

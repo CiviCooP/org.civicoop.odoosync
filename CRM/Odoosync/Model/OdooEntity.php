@@ -233,5 +233,9 @@ class CRM_Odoosync_Model_OdooEntity {
     
     return $values;
   }
+  
+  public static function unlock() {
+    CRM_Core_BAO_Setting::setItem('0', 'org.civicoop.odoosync', 'sync_lock');
+  }
 }
 
