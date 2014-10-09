@@ -228,7 +228,7 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
     $tax = array(new xmlrpcval(array(
             new xmlrpcval(6, "int"),// 6 : id link
             new xmlrpcval(0, "int"), 
-            new xmlrpcval(array(new xmlrpcval($settings->getTaxId(), "int")),"array")
+            new xmlrpcval($this->getProductTaxes($settings->getProductId()),"array")
             ),
         "array" ));
     
@@ -241,6 +241,15 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
     $this->alterOdooParameters($line, $resource, $entity, $entity_id, $action);
     
     return $line;
+  }
+  
+  protected function getProductTaxes($product_id) {
+    $product = $this->connector->read('product.product', $product);
+    $taxes = array();
+    foreach ($product['taxes_id']->scalarval() as $tax_id_res) {
+      $taxes[] = new xmlrpcval($tax_id_res->scalarval(), 'int');
+    }
+    return $taxes;
   }
  
   protected function getContribution($entity_id) {
