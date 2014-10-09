@@ -139,11 +139,15 @@ class CRM_OdooContactSync_AddressSynchronisator extends CRM_Odoosync_Model_Objec
       'street2' => new xmlrpcval($address['supplemental_address_1'], 'string'),
     );
     
-    $country_id = $this->findOdooCountryId($address['country_id']);
-    $parameters['country_id'] = new xmlrpcval($country_id, 'int');
+    if (!empty($address['country_id'])) {
+      $country_id = $this->findOdooCountryId($address['country_id']);
+      $parameters['country_id'] = new xmlrpcval($country_id, 'int');
+    }
     
-    $state_id = $this->findOdooStateId($address['state_province_id'], $address['country_id']);
-    $parameters['state_id'] = new xmlrpcval($state_id, 'int');
+    if (!empty($address['state_province_id']) && !empty($address['country_id'])) {
+      $state_id = $this->findOdooStateId($address['state_province_id'], $address['country_id']);
+      $parameters['state_id'] = new xmlrpcval($state_id, 'int');
+    }
     
     $this->alterOdooParameters($parameters, $this->getOdooResourceType(), $entity, $entity_id, $action);
     
