@@ -232,7 +232,7 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
             ),
         "array" ));
     
-    $line['invoice_line_tax_id'] = new xmlrpcval($tax, 'array');
+    //$line['invoice_line_tax_id'] = new xmlrpcval($tax, 'array');
     $line['name'] = new xmlrpcval($settings->getReference(), 'string');
     $line['price_unit'] = new xmlrpcval($contribution['total_amount'], 'double');
     $line['product_id'] = new xmlrpcval($settings->getProductId(), 'int'); //do we need product id?
