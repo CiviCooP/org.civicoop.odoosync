@@ -12,8 +12,10 @@ CREATE TABLE IF NOT EXISTS `civicrm_odoo_entity` (
   `last_error` TEXT NULL ,
   `last_error_date` DATETIME NULL,
   `status` varchar(255) DEFAULT NULL,
+  `lock` INT (11) NOT NULL default '0', 
   `data` blob NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  INDEX `lock` (`lock`, `action`),
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 CREATE TABLE IF NOT EXISTS `civicrm_odoo_sync_error_log` (

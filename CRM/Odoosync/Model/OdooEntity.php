@@ -79,6 +79,8 @@ class CRM_Odoosync_Model_OdooEntity {
       return;
     }
     
+    $this->lock();
+    
     //set action to update if object still exists in database (e.g. it is only a soft delete)
     if ($this->action == 'DELETE' && $synchronisator->existsInCivi($this)) {
       $this->action = 'UPDATE';
@@ -145,8 +147,12 @@ class CRM_Odoosync_Model_OdooEntity {
     CRM_Core_DAO::executeQuery("DELETE FROM `civicrm_odoo_entity`  WHERE `id` = %1", array(1 => array($this->id, 'Positive')));
   }
   
+  private function lock() {
+    CRM_Core_DAO::executeQuery("UPDATE `civicrm_odoo_entity` SET `lock` = '1'  WHERE `id` = %1", array(1 => array($this->id, 'Positive')));
+  }
+  
   private function save() {
-    $sql = "UPDATE `civicrm_odoo_entity` SET `action` = NULL, odoo_resource = %1, odoo_id = %2, `status` = %3, `odoo_field` = %4, `sync_date` = NOW(), `last_error` = NULL, `last_error_date` = NULL, `data` = %5 WHERE `id` = %6";
+    $sql = "UPDATE `civicrm_odoo_entity` SET `lock` = '0', `action` = NULL, odoo_resource = %1, odoo_id = %2, `status` = %3, `odoo_field` = %4, `sync_date` = NOW(), `last_error` = NULL, `last_error_date` = NULL, `data` = %5 WHERE `id` = %6";
     CRM_Core_DAO::executeQuery($sql, array(
       1 => array($this->odoo_resource ? $this->odoo_resource : '', 'String'),
       2 => array($this->odoo_id ? $this->odoo_id : -1, 'Integer'),
@@ -158,7 +164,7 @@ class CRM_Odoosync_Model_OdooEntity {
   }
   
   public static function sync($limit = 1000, $debug=false) {
-    $sql = "SELECT * FROM `civicrm_odoo_entity`  WHERE `action` IS NOT NULL AND `change_date` IS NOT NULL AND (`sync_date` IS NULL OR `change_date` > `sync_date`) ORDER BY `weight` ASC, `action` ASC, `change_date` ASC LIMIT 0, %1";
+    $sql = "SELECT * FROM `civicrm_odoo_entity`  WHERE `action` IS NOT NULL AND `change_date` IS NOT NULL AND (`sync_date` IS NULL OR `change_date` > `sync_date`) AND `lock` = '0' ORDER BY `weight` ASC, `action` ASC, `change_date` ASC LIMIT 0, %1";
     $dao = CRM_Core_DAO::executeQuery($sql, array(1=>array($limit, 'Positive')));
     while($dao->fetch()) {
       //sync this object
@@ -177,7 +183,7 @@ class CRM_Odoosync_Model_OdooEntity {
       5 => array($error, 'String')
     ));
     
-    $sql = "UPDATE `civicrm_odoo_entity` SET `last_error`  = %1, `last_error_date` = NOW(), `sync_date` = NOW() WHERE `id`  = %2";
+    $sql = "UPDATE `civicrm_odoo_entity` SET `lock` = '0', `last_error`  = %1, `last_error_date` = NOW(), `sync_date` = NOW() WHERE `id`  = %2";
     CRM_Core_DAO::executeQuery($sql, array(
       1 => array($error, 'String'),
       2 => array($this->id, 'Positive')
