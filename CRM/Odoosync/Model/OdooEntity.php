@@ -164,12 +164,16 @@ class CRM_Odoosync_Model_OdooEntity {
   }
   
   public static function sync($limit = 1000, $debug=false) {
-    $sql = "SELECT * FROM `civicrm_odoo_entity`  WHERE `action` IS NOT NULL AND `change_date` IS NOT NULL AND (`sync_date` IS NULL OR `change_date` > `sync_date`) AND `lock` = '0' ORDER BY `weight` ASC, `action` ASC, `change_date` ASC LIMIT 0, %1";
-    $dao = CRM_Core_DAO::executeQuery($sql, array(1=>array($limit, 'Positive')));
-    while($dao->fetch()) {
+    for ($count=0; $count < $limit; $count++) {
+      $sql = "SELECT * FROM `civicrm_odoo_entity`  WHERE `action` IS NOT NULL AND `change_date` IS NOT NULL AND (`sync_date` IS NULL OR `change_date` > `sync_date`) AND `lock` = '0' ORDER BY `weight` ASC, `action` ASC, `change_date` ASC LIMIT 0,1";
+      $dao = CRM_Core_DAO::executeQuery($sql);
       //sync this object
-      $odooEntity = new CRM_Odoosync_Model_OdooEntity($dao);
-      $odooEntity->process($debug);
+      if ($dao->fetch()) {
+        $odooEntity = new CRM_Odoosync_Model_OdooEntity($dao);
+        $odooEntity->process($debug);
+      } else {
+        break;
+      }
     }
   }
   
