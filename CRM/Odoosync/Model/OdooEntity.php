@@ -158,23 +158,24 @@ class CRM_Odoosync_Model_OdooEntity {
   }
   
   public static function sync($limit = 1000, $debug=false) {
+    //do not sync when lock is set
     $locked = CRM_Core_BAO_Setting::getItem('org.civicoop.odoosync', 'sync_lock');
     if ($locked) {
-      return;
+      throw new Exception('Sync in lock');
     }
+    
+    //set lock
     CRM_Core_BAO_Setting::setItem('1', 'org.civicoop.odoosync', 'sync_lock');
     
-    for ($count=0; $count < $limit; $count++) {
-      $sql = "SELECT * FROM `civicrm_odoo_entity`  WHERE `action` IS NOT NULL AND `change_date` IS NOT NULL AND (`sync_date` IS NULL OR `change_date` > `sync_date`) ORDER BY `weight` ASC, `action` ASC, `change_date` ASC LIMIT 0,1";
-      $dao = CRM_Core_DAO::executeQuery($sql);
-      //sync this object
-      if ($dao->fetch()) {
-        $odooEntity = new CRM_Odoosync_Model_OdooEntity($dao);
-        $odooEntity->process($debug);
-      } else {
-        break;
-      }
+    $sql = "SELECT * FROM `civicrm_odoo_entity`  WHERE `action` IS NOT NULL AND `change_date` IS NOT NULL AND (`sync_date` IS NULL OR `change_date` > `sync_date`) ORDER BY `weight` ASC, `action` ASC, `change_date` ASC LIMIT 0, %1";
+    $dao = CRM_Core_DAO::executeQuery($sql, array(1 => array($limit, 'Integer')));
+    //sync this object
+    while ($dao->fetch()) {
+      $odooEntity = new CRM_Odoosync_Model_OdooEntity($dao);
+      $odooEntity->process($debug);
     }
+    
+    //release lock
     CRM_Core_BAO_Setting::setItem('0', 'org.civicoop.odoosync', 'sync_lock');
   }
   
