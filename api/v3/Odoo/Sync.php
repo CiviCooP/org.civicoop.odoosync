@@ -32,7 +32,7 @@ function civicrm_api3_odoo_sync($params) {
     if ($lock) {
       $lockDateTime = new DateTime();
       $lockDateTime->setTimestamp($lock);
-      $returnValues['lock_datetime'] = $lockDateTime->format('d-m-Y h:i:s');
+      $returnValues['lock_datetime'] = $lockDateTime->format('d-m-Y H:i:s');
     }
   } else {
 
