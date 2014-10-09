@@ -8,11 +8,11 @@ require_once __DIR__.'/lib/xmlrpc.inc';
  * 
  */
 function odoosync_civicrm_odoo_object_definition(&$list) {
-  $list['civicrm_contact'] = new CRM_OdooContactSync_ContactDefinition();
-  $list['civicrm_address'] = new CRM_OdooContactSync_AddressDefinition();
-  $list['civicrm_email'] = new CRM_OdooContactSync_EmailDefinition();
   $list['civicrm_phone'] = new CRM_OdooContactSync_PhoneDefinition();
+  $list['civicrm_email'] = new CRM_OdooContactSync_EmailDefinition();
+  $list['civicrm_address'] = new CRM_OdooContactSync_AddressDefinition();  
   $list['civicrm_contribution'] = new CRM_OdooContributionSync_ContributionDefinition();
+  $list['civicrm_contact'] = new CRM_OdooContactSync_ContactDefinition();
 }
 
 
