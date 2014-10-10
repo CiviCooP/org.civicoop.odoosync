@@ -51,7 +51,11 @@ class CRM_Odoosync_Objectlist {
       $table = $def->getTableName();
       $id = $def->getIdFieldName();
       $entity = $def->getCiviCRMEntityName();
-      $sql = "SELECT `".$table."`.`".$id."` AS `id` FROM `".$table."` LEFT JOIN `civicrm_odoo_entity` ON `civicrm_odoo_entity`.`entity_id` = `".$table."`.`".$id."` AND `civicrm_odoo_entity`.`entity` = '".$entity."' WHERE `civicrm_odoo_entity`.`id` IS NULL LIMIT ".$itemsToSync;
+      $sql = "SELECT `".$table."`.`".$id."` AS `id` FROM `".$table."`
+              WHERE `".$table."`.`".$id."` NOT IN (
+                SELECT `civicrm_odoo_entity`.`entity_id` FROM `civicrm_odoo_entity` 
+                WHERE `civicrm_odoo_entity`.`entity` = '".$entity."')
+              LIMIT ".$itemsToSync;
       $dao = CRM_Core_DAO::executeQuery($sql);
       while($dao->fetch()) {
         $data = array();
