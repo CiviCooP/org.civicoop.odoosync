@@ -35,7 +35,14 @@ Class CRM_OdooContactSync_ContactDefinition extends CRM_Odoosync_Model_ObjectDef
   }
   
   public function getCiviCRMEntityDataById($id) {
-    return civicrm_api3('Contact', 'getsingle', array('id' => $id));
+    $data = array();
+    $dao = new CRM_Contact_BAO_Contact();
+    $dao->id = $id;
+    if ($dao->find(true)) {
+      CRM_Core_DAO::storeValues($dao, &$data);
+    }
+    return $data;
+    //return civicrm_api3('Contact', 'getsingle', array('id' => $id));
   }
 }
 
