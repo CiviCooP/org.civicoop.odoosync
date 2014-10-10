@@ -110,15 +110,7 @@ class CRM_OdooContactSync_ContactSynchronisator extends CRM_Odoosync_Model_Objec
  
   protected function getContact($contactId) {
     if (!isset($this->_contactCache[$contactId])) {
-      $data = array();
-      $dao = new CRM_Contact_BAO_Contact();
-      $dao->id = $id;
-      if ($dao->find(true)) {
-        CRM_Core_DAO::storeValues($dao, $data);
-      }
-      
-      $this->_contactCache[$contactId] = $data;  
-      //$this->_contactCache[$contactId] = civicrm_api3('Contact', 'getsingle', array('id' => $contactId));
+      $this->_contactCache[$contactId] = civicrm_api3('Contact', 'getsingle', array('id' => $contactId));
     }
     
     return $this->_contactCache[$contactId];
