@@ -36,7 +36,6 @@ CREATE TABLE IF NOT EXISTS `civicrm_odoo_contribution_settings` (
   `journal_id` int(11) NOT NULL,
   `account_id` int(11) NOT NULL,
   `product_id` int(11) NOT NULL,
-  `tax_id` int(11) NOT NULL,
   `confirmed` int(1) NOT NULL default '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;

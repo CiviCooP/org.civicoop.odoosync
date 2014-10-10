@@ -25,10 +25,6 @@ class CRM_OdooContributionSync_BAO_OdooContributionSettings extends CRM_OdooCont
     return $this->product_id;
   }
   
-  public function getTaxId() {
-    return $this->tax_id;
-  }
-  
   public function getConfirmed() {
     return $this->confirmed;
   }

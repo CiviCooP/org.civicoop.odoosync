@@ -51,6 +51,11 @@ class CRM_Odoosync_Upgrader extends CRM_Odoosync_Upgrader_Base {
     $this->addOptionValue('send_to_bank', 'Send to bank', $this->contribution_status_id);
     return TRUE;
   }
+  
+  public function upgrade_1007() {
+    $this->executeSqlFile('sql/upgrade_1007.sql');
+    return TRUE;
+  }
 
   public function uninstall() {
    $this->executeSqlFile('sql/uninstall.sql');

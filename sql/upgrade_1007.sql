@@ -1,0 +1,1 @@
+ALTER TABLE `civicrm_odoo_contribution_settings` DROP `tax_id`;

@@ -92,7 +92,6 @@ class CRM_OdooContributionSync_Page_OdooContributionSync extends CRM_Core_Page_B
     $journals = $utils->getAvailableJournals();
     $accounts = $utils->getAvailableAccounts();
     $products = $utils->getAvailableProducts();
-    $taxes = $utils->getAvailableTaxes();
     
     $settings = CRM_OdooContributionSync_BAO_OdooContributionSettings::getSettings();
     
@@ -105,7 +104,6 @@ class CRM_OdooContributionSync_Page_OdooContributionSync extends CRM_Core_Page_B
       $setting['journal_id'] = $journals[$setting['journal_id']];
       $setting['account_id'] = $accounts[$setting['account_id']];
       $setting['product_id'] = $products[$setting['product_id']];
-      $setting['tax_id'] = $taxes[$setting['tax_id']];
 
       $setting['action'] = CRM_Core_Action::formLink(self::links(), $action,
         array('id' => $setting['id'])

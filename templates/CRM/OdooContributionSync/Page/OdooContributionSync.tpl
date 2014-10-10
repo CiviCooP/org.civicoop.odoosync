@@ -24,7 +24,6 @@
                 <th >{ts}Journal ID{/ts}</th>
                 <th >{ts}Account ID{/ts}</th>
                 <th >{ts}Product ID{/ts}</th>
-                <th >{ts}Tax ID{/ts}</th>
                 <th >{ts}Action{/ts}</th>
             </tr>
             {foreach from=$rows item=row}
@@ -35,7 +34,6 @@
                     <td class="crm-odoo_contribution_setting-journal_id">{$row.journal_id}</td>
                     <td class="crm-odoo_contribution_setting-account_id">{$row.account_id}</td>
                     <td class="crm-odoo_contribution_setting-product_id">{$row.product_id}</td>
-                    <td class="crm-odoo_contribution_setting-tax_id">{$row.tax_id}</td>
                     <td>{$row.action|replace:'xx':$row.id}</td>
                 </tr>
             {/foreach}

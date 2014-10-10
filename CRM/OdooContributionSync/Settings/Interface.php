@@ -38,13 +38,6 @@ interface CRM_OdooContributionSync_Settings_Interface {
   public function getAccountId();
   
   /**
-   * Returns the Odoo tax id for an invoice line
-   * 
-   * @return int
-   */
-  public function getTaxId();
-  
-  /**
    * Returns the product ID for this contribution
    * 
    */
