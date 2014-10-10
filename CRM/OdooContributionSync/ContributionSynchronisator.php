@@ -244,7 +244,9 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
   }
   
   protected function getProductTaxes($product_id) {
-    $product = $this->connector->read('product.product', $product_id);
+    //$product = $this->connector->read('product.product', $product_id);
+    $utils = CRM_OdooContributionSync_Utils_Product::singleton();
+    $product = $utils->getProductFromOdoo($product_id);
     $taxes = array();
     foreach ($product['taxes_id']->scalarval() as $tax_id_res) {
       $taxes[] = new xmlrpcval($tax_id_res->scalarval(), 'int');
