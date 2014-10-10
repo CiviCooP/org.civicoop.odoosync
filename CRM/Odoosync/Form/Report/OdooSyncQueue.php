@@ -39,9 +39,9 @@ class CRM_Odoosync_Form_Report_OdooSyncQueue extends CRM_Report_Form {
   
   function modifyColumnHeaders() {
     // use this method to modify $this->_columnHeaders
-    $this->_columnHeaders['entity'] = 'entity';
-    $this->_columnHeaders['status'] = 'status';
-    $this->_columnHeaders['total'] = 'total';
+    $this->_columnHeaders['entity'] = array('title' => 'entity');
+    $this->_columnHeaders['status'] = array('title' =>'status');
+    $this->_columnHeaders['total'] = array('title' =>'total');
   }
 
   function alterDisplay(&$rows) {
