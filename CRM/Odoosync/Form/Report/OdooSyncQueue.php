@@ -10,6 +10,7 @@ class CRM_Odoosync_Form_Report_OdooSyncQueue extends CRM_Report_Form {
 
   protected $_customGroupExtends = array();
   protected $_customGroupGroupBy = FALSE; 
+  protected $_add2groupSupported = FALSE;
   
   function __construct() {
     $this->_groupFilter = FALSE;
