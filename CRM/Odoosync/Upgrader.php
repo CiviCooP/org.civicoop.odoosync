@@ -46,6 +46,11 @@ class CRM_Odoosync_Upgrader extends CRM_Odoosync_Upgrader_Base {
     $this->executeSqlFile('sql/upgrade_1005.sql');
     return TRUE;
   }
+  
+  public function upgrade_1006() {
+    $this->addOptionValue('send_to_bank', 'Send to bank', $this->contribution_status_id);
+    return TRUE;
+  }
 
   public function uninstall() {
    $this->executeSqlFile('sql/uninstall.sql');
@@ -54,6 +59,7 @@ class CRM_Odoosync_Upgrader extends CRM_Odoosync_Upgrader_Base {
   protected function addContributionStatuses() {
     $this->addOptionValue('refunded', 'Refund', $this->contribution_status_id);
     $this->addOptionValue('payment_scheme', 'Payment scheme', $this->contribution_status_id);
+    $this->addOptionValue('send_to_bank', 'Send to bank', $this->contribution_status_id);
   }
   
   protected function addActivityTypes() {
