@@ -30,12 +30,12 @@ function civicrm_api3_odoo_sync($params) {
   } elseif (!empty($params['getlock'])) {
     $lock = CRM_Odoosync_Model_OdooEntity::getLock();
     $lockTime = $lock->getLockTime();
-    $returnValues['lock'] = $lockTime;
-    $returnValues['unlock_count'] = $lock->getLockCount();
+    $returnValues[1]['lock'] = $lockTime;
+    $returnValues[1]['unlock_count'] = $lock->getLockCount();
     if ($lockTime) {
       $lockDateTime = new DateTime();
       $lockDateTime->setTimestamp($lockTime);
-      $returnValues['lock_datetime'] = $lockDateTime->format('d-m-Y H:i:s');
+      $returnValues[1]['lock_datetime'] = $lockDateTime->format('d-m-Y H:i:s');
     }
   } else {
 
