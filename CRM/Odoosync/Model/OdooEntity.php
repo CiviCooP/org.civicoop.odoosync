@@ -152,11 +152,11 @@ class CRM_Odoosync_Model_OdooEntity {
   private function save() {
     $sql = "UPDATE `civicrm_odoo_entity` SET `action` = NULL, odoo_resource = %1, odoo_id = %2, `status` = %3, `odoo_field` = %4, `sync_date` = NOW(), `last_error` = NULL, `last_error_date` = NULL, `data` = %5 WHERE `id` = %6";
     CRM_Core_DAO::executeQuery($sql, array(
-      1 => array($this->odoo_resource ? $this->odoo_resource : '', 'String'),
-      2 => array($this->odoo_id ? $this->odoo_id : -1, 'Integer'),
+      1 => array(!empty($this->odoo_resource) ? $this->odoo_resource : '', 'String'),
+      2 => array(!empty($this->odoo_id) ? $this->odoo_id : -1, 'Integer'),
       3 => array($this->status, 'String'),
       4 => array($this->odoo_field, 'String'),
-      5 => array($this->data, 'String'),
+      5 => array(!empty($this->data) ? $this->data : '', 'String'),
       6 => array($this->id, 'Positive'),
     ));
   }
