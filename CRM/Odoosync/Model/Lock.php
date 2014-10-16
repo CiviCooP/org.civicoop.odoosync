@@ -24,7 +24,7 @@ class CRM_Odoosync_Model_Lock {
   }
   
   public function autoUnlock() {
-    if ($this->hasLock()) {
+    if ($this->isLocked()) {
       $lockTime = time() - $this->getLockTime();
       if ($lockTime > (4*60*60)) {
         //after 4 hours unlock
