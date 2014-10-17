@@ -28,7 +28,7 @@ class CRM_Odoosync_Form_Report_OdooSyncQueue extends CRM_Report_Form {
     $this->beginPostProcess();
 
     // get the acl clauses built before we assemble the query
-    $sql = "SELECT entity, `status`, COUNT(*) AS `total` FROM `civicrm_odoo_entity` GROUP BY `entity`, `status`;";
+    $sql = "SELECT entity, `status`, `last_error`, COUNT(*) AS `total` FROM `civicrm_odoo_entity` GROUP BY `entity`, `status`, `last_error` ORDER BY `status`, `entity`, `last_error`;";
 
     $rows = array();
     $this->buildRows($sql, $rows);
@@ -42,6 +42,7 @@ class CRM_Odoosync_Form_Report_OdooSyncQueue extends CRM_Report_Form {
     // use this method to modify $this->_columnHeaders
     $this->_columnHeaders['entity'] = array('title' => 'entity');
     $this->_columnHeaders['status'] = array('title' =>'status');
+    $this->_columnHeaders['last_error'] = array('title' =>'Last error');
     $this->_columnHeaders['total'] = array('title' =>'total');
   }
 
