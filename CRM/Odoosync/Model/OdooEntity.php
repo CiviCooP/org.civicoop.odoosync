@@ -207,7 +207,7 @@ class CRM_Odoosync_Model_OdooEntity {
    * @param int $entity_id
    * @return int|false
    */
-  public function findOdooIdByEntity($entity, $entity_id) {
+  public static function findOdooIdByEntityAndEntityId($entity, $entity_id) {
     $sql = "SELECT `odoo_id`  FROM `civicrm_odoo_entity` WHERE `entity` = %1  AND `entity_id`  = %2";
     $dao = CRM_Core_DAO::executeQuery($sql, array(
       1 => array($entity, 'String'),
@@ -218,6 +218,10 @@ class CRM_Odoosync_Model_OdooEntity {
       return $dao->odoo_id;
     } 
     return false;
+  }
+  
+  public function findOdooIdByEntity($entity, $entity_id) {
+    return self::findOdooIdByEntityAndEntityId($entity, $entity_id);
   }
   
   public function findByOdooIdAndField($resource, $odoo_id, $odoo_field) {
