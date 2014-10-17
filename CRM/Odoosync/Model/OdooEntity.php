@@ -224,6 +224,23 @@ class CRM_Odoosync_Model_OdooEntity {
     return self::findOdooIdByEntityAndEntityId($entity, $entity_id);
   }
   
+  public static function findByOdooId($resource, $odoo_id) {
+    $sql = "SELECT *  FROM `civicrm_odoo_entity` WHERE `odoo_resource` = %1  AND `odoo_id`  = %2";
+    $dao = CRM_Core_DAO::executeQuery($sql, array(
+      1 => array($resource, 'String'),
+      2 => array($odoo_id, 'Integer'),
+    ));
+    
+    $values = array();
+    while($dao->fetch()) {
+      $v = array();
+      CRM_Core_DAO::storeValues($dao, $v);
+      $values[$dao->id] = $v;
+    }
+    
+    return $values;
+  }
+  
   public function findByOdooIdAndField($resource, $odoo_id, $odoo_field) {
     $sql = "SELECT *  FROM `civicrm_odoo_entity` WHERE `odoo_resource` = %1  AND `odoo_id`  = %2 AND `odoo_field`  = %3";
     $dao = CRM_Core_DAO::executeQuery($sql, array(
