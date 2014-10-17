@@ -233,9 +233,8 @@ class CRM_Odoosync_Model_OdooEntity {
     
     $values = array();
     while($dao->fetch()) {
-      $v = array();
-      CRM_Core_DAO::storeValues($dao, $v);
-      $values[$dao->id] = $v;
+      $values[$dao->id]['entity_id'] = $dao->entity_id;
+      $values[$dao->id]['entity'] = $dao->entity;
     }
     
     return $values;
