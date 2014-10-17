@@ -15,6 +15,28 @@ Returns an array with classes which implement the CRM_Odoosync_Model_ObjectDefin
         $list['civicrm_contact'] = new CRM_Odoosync_Model_ContactDefinition();
     }
 
+## hook_civicrm_odoo_object_definition_dependency
+
+This hook returns a list with object dependencies returns an array of CRM_Odoosync_Model_Dependency
+
+**Return values**
+
+Returns an array of CRM_Odoosync_Model_Dependency
+
+**Example**
+
+    function odoosync_civicrm_odoo_object_definition_dependency(&$dependencies, CRM_Odoosync_Model_ObjectDefinition $def, $entity_id, $action, $data=false) {
+        if ($def instanceof CRM_OdooContributionSync_ContributionDefinition) {
+            if (is_array($data) && isset($data['contact_id'])) {
+                $contact_id = $data['contact_id'];
+            } else {
+                $contact_id = civicrm_api3('Contribution', 'getvalue', array('return' => 'contact_id', 'id' => $entity_id));
+            }
+      
+            $deps[] = new CRM_Odoosync_Model_Dependency('civicrm_contact', $contact_id);
+        }
+    }
+
 ## hook_civicrm_odoo_alter_parameters
 
 This hook is useful to alter parameters before updating or inserting an object into Odoo. E.g. when a specific implementation of Odoo has specific fields which are also available in CivICRM

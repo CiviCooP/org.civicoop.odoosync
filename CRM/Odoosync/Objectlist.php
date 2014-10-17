@@ -153,11 +153,18 @@ class CRM_Odoosync_Objectlist {
   }
   
   private function saveAllDependencies(CRM_Odoosync_Model_ObjectDefinitionInterface $objectDef, $entity_id, $action, $data = false) {
+    $deps = array();
     if ($objectDef instanceof CRM_Odoosync_Model_ObjectDependencyInterface) {
       //definition has dependencies check those and save them into the sync queue      
-      foreach($objectDef->getSyncDependenciesForEntity($entity_id, $data) as $dep) {        
-        $this->saveDependency($dep, $objectDef->getWeight($action) + $dep->getWeightOffset());
-      }
+      $deps = $objectDef->getSyncDependenciesForEntity($entity_id, $data);
+    }
+    
+    $hooks = CRM_Utils_Hook::singleton();
+    $hooks->invoke(5, $deps, $objectDef, $entity_id, $action, $data, 'civicrm_odoo_object_definition_dependency');
+    
+    
+    foreach($deps as $dep) {        
+      $this->saveDependency($dep, $objectDef->getWeight($action) + $dep->getWeightOffset());
     }
   }
   
