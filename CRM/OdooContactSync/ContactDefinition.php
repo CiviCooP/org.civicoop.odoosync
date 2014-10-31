@@ -16,6 +16,9 @@ Class CRM_OdooContactSync_ContactDefinition extends CRM_Odoosync_Model_ObjectDef
     if (in_array($objectName, $contactTypes)) {
       return true;
     }
+    if ($objectName == 'civicrm_contact') {
+      return true;
+    }
     return false;
   }
   

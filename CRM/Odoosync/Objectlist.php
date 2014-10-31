@@ -74,7 +74,7 @@ class CRM_Odoosync_Objectlist {
   /**
    * Singleton pattern
    * 
-   * @return CRM_Odoosync_Parameters
+   * @return CRM_Odoosync_Objectlist
    */
   public static function singleton() {
     if (!self::$_instance) {
