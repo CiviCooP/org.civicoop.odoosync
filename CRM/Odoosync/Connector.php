@@ -43,6 +43,12 @@ class CRM_Odoosync_Connector {
   public function getUserId() {
     return $this->userId;
   }
+  
+  protected function getClient($url) {
+    $sock = new xmlrpc_client($url);
+    $sock->request_charset_encoding="UTF-8";
+    return $sock;
+  }
 
   /**
    * Login into Odoo
@@ -50,7 +56,7 @@ class CRM_Odoosync_Connector {
   protected function login() {
     $server_url = $this->config->getUrl();
 
-    $sock = new xmlrpc_client($server_url . 'common');
+    $sock = $this->getClient($server_url . 'common');
     $msg = new xmlrpcmsg('login');
     $msg->addParam(new xmlrpcval($this->config->getDatabasename(), "string"));
     $msg->addParam(new xmlrpcval($this->config->getUsername(), "string"));
@@ -72,7 +78,7 @@ class CRM_Odoosync_Connector {
   public function search($resource, $key) {
     $server_url = $this->config->getUrl();
 
-    $client = new xmlrpc_client($server_url . 'object');
+    $client = $this->getClient($server_url . 'object');
     $msg = new xmlrpcmsg('execute');
     $msg->addParam(new xmlrpcval($this->config->getDatabasename(), "string"));
     $msg->addParam(new xmlrpcval($this->getUserId(), "int"));
@@ -95,7 +101,7 @@ class CRM_Odoosync_Connector {
   public function read($resource, $id) {
     $server_url = $this->config->getUrl();
 
-    $client = new xmlrpc_client($server_url . 'object');
+    $client = $this->getClient($server_url . 'object');
     $msg = new xmlrpcmsg('execute');
     $msg->addParam(new xmlrpcval($this->config->getDatabasename(), "string"));
     $msg->addParam(new xmlrpcval($this->getUserId(), "int"));
@@ -122,7 +128,7 @@ class CRM_Odoosync_Connector {
   public function write($resource, $id, $parameters) {
     $server_url = $this->config->getUrl();
 
-    $client = new xmlrpc_client($server_url . 'object');
+    $client = $this->getClient($server_url . 'object');
     $msg = new xmlrpcmsg('execute');
     $msg->addParam(new xmlrpcval($this->config->getDatabasename(), "string"));
     $msg->addParam(new xmlrpcval($this->getUserId(), "int"));
@@ -149,7 +155,7 @@ class CRM_Odoosync_Connector {
   public function unlink($resource, $id) {
     $server_url = $this->config->getUrl();
 
-    $client = new xmlrpc_client($server_url . 'object');
+    $client = $this->getClient($server_url . 'object');
     $msg = new xmlrpcmsg('execute');
     $msg->addParam(new xmlrpcval($this->config->getDatabasename(), "string"));
     $msg->addParam(new xmlrpcval($this->getUserId(), "int"));
@@ -171,7 +177,7 @@ class CRM_Odoosync_Connector {
   public function create($resource, $parameters) {
     $server_url = $this->config->getUrl();
 
-    $client = new xmlrpc_client($server_url . 'object');
+    $client = $this->getClient($server_url . 'object');
     $msg = new xmlrpcmsg('execute');
     $msg->addParam(new xmlrpcval($this->config->getDatabasename(), "string"));
     $msg->addParam(new xmlrpcval($this->getUserId(), "int"));
@@ -194,7 +200,7 @@ class CRM_Odoosync_Connector {
   public function exec_workflow($resource, $method, $id) {
     $server_url = $this->config->getUrl();
 
-    $client = new xmlrpc_client($server_url . 'object');
+    $client = $this->getClient($server_url . 'object');
     $msg = new xmlrpcmsg('exec_workflow');
     $msg->addParam(new xmlrpcval($this->config->getDatabasename(), "string"));
     $msg->addParam(new xmlrpcval($this->getUserId(), "int"));
