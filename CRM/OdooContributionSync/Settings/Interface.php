@@ -16,11 +16,19 @@ interface CRM_OdooContributionSync_Settings_Interface {
   
   /**
    * Returns a string which is stored 
-   * in the reference field of an Odoo Invoice
+   * in the reference field of an Odoo Invoice line
    * 
    * @return string
    */
   public function getReference();
+  
+  /**
+   * Returns a string which is stored 
+   * in the reference field of an Odoo Invoice (Reference for client)
+   * 
+   * @return string
+   */
+  public function getClientReference();
   
   /**
    * Returns the ID of the company

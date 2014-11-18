@@ -38,6 +38,15 @@ class CRM_OdooContributionSync_BAO_OdooContributionSettings extends CRM_OdooCont
     return '';
   }
   
+  public function getClientReference() {
+    $ref = $this->getReference();
+    if (isset($this->contribution['receive_date'])) {
+      $date = new DateTime($this->contribution['receive_date']);
+      $ref .= ' '.$date->format('d-m');
+    }
+    return trim($ref);
+  }
+  
   static function create($values) {
     $dao = new CRM_OdooContributionSync_BAO_OdooContributionSettings();
     $dao->copyValues($values);

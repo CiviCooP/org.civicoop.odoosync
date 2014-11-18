@@ -185,6 +185,7 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
     $parameters['partner_id'] = new xmlrpcval($partner_id, 'int');
     $parameters['reference'] = new xmlrpcval($settings->getReference(), 'string');
     $parameters['company_id'] = new xmlrpcval($settings->getCompanyId(), 'int');
+    $parameters['name'] = new xmlrpcval($settings->getClientReference(), 'string');
     
     //set currency
     if (isset($contribution['currency'])) {
