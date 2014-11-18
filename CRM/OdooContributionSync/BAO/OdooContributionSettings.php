@@ -30,8 +30,11 @@ class CRM_OdooContributionSync_BAO_OdooContributionSettings extends CRM_OdooCont
   }
   
   public function getReference() {
-    if ($this->contribution && isset($this->contribution['financial_type'])) {
-      return $this->contribution['finanial_type'];
+    $connector = CRM_Odoosync_Connector::singleton();
+    $product = $connector->read('product.product', $this->getProductId());
+    var_dump($product); exit();
+    if ($product) {
+      return $product['name']->scalarval();
     }
     return '';
   }
