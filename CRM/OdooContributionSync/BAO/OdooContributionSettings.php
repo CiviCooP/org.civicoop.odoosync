@@ -42,7 +42,7 @@ class CRM_OdooContributionSync_BAO_OdooContributionSettings extends CRM_OdooCont
     $ref = $this->getReference();
     if (isset($this->contribution['receive_date'])) {
       $date = new DateTime($this->contribution['receive_date']);
-      $ref .= ' '.$date->format('d-m');
+      $ref .= ' '.$date->format('d-m-Y');
     }
     return trim($ref);
   }
