@@ -15,6 +15,13 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
       return false;
     }
     
+    if (!empty($contribution['invoice_id']) && is_int($contribution['invoice_id']) && $this->existsInOdoo($contribution['invoice_id'])) {
+      //contribution is created from within Odoo.
+      //so do not sync back to Odoo
+      return false;
+      
+    }
+    
     $settings = CRM_OdooContributionSync_Factory::getSettingsForContribution($contribution);
     if ($settings === false) {
       try {
@@ -156,7 +163,7 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
    * @param CRM_Odoosync_Model_OdooEntity $sync_entity
    * @return boolean
    */
-  public function findOdooId(CRM_Odoosync_Model_OdooEntity $sync_entity) {    
+  public function findOdooId(CRM_Odoosync_Model_OdooEntity $sync_entity) {
     return false;
   }
   
