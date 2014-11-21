@@ -45,6 +45,7 @@ class CRM_Odoosync_Connector {
   }
   
   protected function getClient($url) {
+    $GLOBALS['xmlrpc_internalencoding']='UTF-8';
     $sock = new xmlrpc_client($url);
     $sock->request_charset_encoding="UTF-8";
     return $sock;
