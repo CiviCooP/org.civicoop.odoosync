@@ -30,12 +30,16 @@ class CRM_OdooContributionSync_BAO_OdooContributionSettings extends CRM_OdooCont
   }
   
   public function getReference() {
+    $ref = '';
     $connector = CRM_Odoosync_Connector::singleton();
     $product = $connector->read('product.product', $this->getProductId());
     if ($product) {
-      return $product['name']->scalarval();
+      $ref = $product['name']->scalarval();
     }
-    return '';
+    if (!empty($this->contribution['source'])) {
+      $ref = $this->contribution['source'].' ('.$ref.')';
+    }
+    return $ref;
   }
   
   public function getClientReference() {
