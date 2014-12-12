@@ -12,9 +12,12 @@ class CRM_Odoosync_Form_Report_OdooSyncQueue extends CRM_Report_Form {
   protected $_customGroupGroupBy = FALSE; 
   protected $_add2groupSupported = FALSE;
   
+  protected $_noFields = TRUE;
+  
   function __construct() {
     $this->_groupFilter = FALSE;
     $this->_tagFilter = FALSE;
+    $this->_columns = array();
     parent::__construct();
   }
 
@@ -22,14 +25,18 @@ class CRM_Odoosync_Form_Report_OdooSyncQueue extends CRM_Report_Form {
     $this->assign('reportTitle', ts('Odoo Sync Queue'));
     parent::preProcess();
   }
+  
+  function buildQuery($applyLimit = TRUE) {
+    return "SELECT entity, `status`, `last_error`, COUNT(*) AS `total` FROM `civicrm_odoo_entity` GROUP BY `entity`, `status`, `last_error` ORDER BY `status`, `entity`, `last_error`;";
+  }
 
   function postProcess() {
 
     $this->beginPostProcess();
 
     // get the acl clauses built before we assemble the query
-    $sql = "SELECT entity, `status`, `last_error`, COUNT(*) AS `total` FROM `civicrm_odoo_entity` GROUP BY `entity`, `status`, `last_error` ORDER BY `status`, `entity`, `last_error`;";
-
+    $sql = $this->buildQuery(TRUE);
+    
     $rows = array();
     $this->buildRows($sql, $rows);
 
