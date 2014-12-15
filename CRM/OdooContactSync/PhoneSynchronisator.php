@@ -162,11 +162,10 @@ class CRM_OdooContactSync_PhoneSynchronisator extends CRM_Odoosync_Model_ObjectS
   
   protected function detemerineOdooFieldForPhone($phone) {
     $translations = $this->phoneTypeToOdooField();
-    $phoneTypes = CRM_Core_PseudoConstant::get('CRM_Core_DAO_Phone', 'phone_type_id');
-    $phoneType = $phoneTypes[$phone['phone_type_id']];
+    $phoneType = CRM_Core_OptionGroup::getValue('phone_type', $phone['phone_type_id'], 'value', 'String', 'name');
     if (isset($translations[$phoneType])) {
       return $translations[$phoneType];
-    }
+    }    
     return false;
   }
  
