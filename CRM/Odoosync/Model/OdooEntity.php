@@ -111,6 +111,12 @@ class CRM_Odoosync_Model_OdooEntity {
     if ($this->action == 'INSERT' && $this->odoo_id > 0) {
       $this->action = 'UPDATE';
     }
+    //set action to insert if action is update with an unknown odoo id
+    if ($this->action == 'UPDATE' && (!$this->odoo_id || $this->odoo_id <= 0)) {
+        $this->action == 'INSERT';
+    }
+    
+    
     
     try {
       switch($this->action) {
