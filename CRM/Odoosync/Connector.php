@@ -119,7 +119,7 @@ class CRM_Odoosync_Connector {
     $this->setLastResponse($resp);
 
     if ($resp->faultCode()) {
-      $this->log('Error search a '.$resource.': '.$resp->faultCode(). ' (' . $resp->faultString().') with raw response: '.$resp->raw_data);
+      $this->log('Error read a '.$resource.': '.$resp->faultCode(). ' (' . $resp->faultString().') with raw response: '.$resp->raw_data);
       return false;
     }
     
@@ -147,7 +147,7 @@ class CRM_Odoosync_Connector {
     $this->setLastResponse($resp);
 
     if ($resp->faultCode()) {
-      $this->log('Error search a '.$resource.': '.$resp->faultCode(). ' (' . $resp->faultString().') with raw response: '.$resp->raw_data);
+      $this->log('Error write a '.$resource.': '.$resp->faultCode(). ' (' . $resp->faultString().') with raw response: '.$resp->raw_data);
       return false;
     }
     return $resp->value()->scalarval();
@@ -169,7 +169,7 @@ class CRM_Odoosync_Connector {
     $this->setLastResponse($resp);
 
     if ($resp->faultCode()) {
-      $this->log('Error search a '.$resource.': '.$resp->faultCode(). ' (' . $resp->faultString().') with raw response: '.$resp->raw_data);
+      $this->log('Error unlink a '.$resource.': '.$resp->faultCode(). ' (' . $resp->faultString().') with raw response: '.$resp->raw_data);
       return false;
     }
     return $resp->value()->scalarval();
@@ -214,7 +214,7 @@ class CRM_Odoosync_Connector {
     $this->setLastResponse($resp);
 
     if ($resp->faultCode()) {
-      $this->log('Error creating a '.$resource.': '.$resp->faultCode(). ' (' . $resp->faultString().') with raw response: '.$resp->raw_data);
+      $this->log('Error exec_workflow a '.$resource.': '.$resp->faultCode(). ' (' . $resp->faultString().') with raw response: '.$resp->raw_data);
       return false;
     }
     
