@@ -147,7 +147,7 @@ class CRM_Odoosync_Connector {
     $this->setLastResponse($resp);
 
     if ($resp->faultCode()) {
-      $this->log('Error write a '.$resource.': '.$resp->faultCode(). ' (' . $resp->faultString().') with raw response: '.$resp->raw_data);
+      $this->log('Error write a '.$resource.': '.$resp->faultCode(). ' (' . $resp->faultString().') with raw response: '.$resp->raw_data."\r\nParameters: ".  var_export($parameters, true));
       return false;
     }
     return $resp->value()->scalarval();
