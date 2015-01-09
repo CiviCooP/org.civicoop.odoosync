@@ -75,6 +75,7 @@ class CRM_OdooContributionSync_Utils {
   public function isBookYearAvailable($year) {
     //check if currency id exist in cache
     //if not try to retrieve it from Odoo
+    return false;
     if (!isset($this->openBookYears[$year])) {
       $keys = array(
         new xmlrpcval(array(
