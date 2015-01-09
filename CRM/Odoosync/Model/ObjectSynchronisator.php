@@ -66,20 +66,23 @@ abstract class CRM_Odoosync_Model_ObjectSynchronisator {
     $this->connector = CRM_Odoosync_Connector::singleton();
   }
   
-  /**
-   * Check if in an entity still exists in Odoo
-   * 
-   * @param int $odoo_id
-   * @return boolean
-   */
-  public function existsInOdoo($odoo_id) {
-    if ($this->connector->read($this->getOdooResourceType(), $odoo_id)) {
-      return true;
+    /**
+     * Check if in an entity still exists in Odoo
+     * 
+     * @param int $odoo_id
+     * @return boolean
+     */
+    public function existsInOdoo($odoo_id) {
+        if (empty($odoo_id)) {
+            return false;
+        }
+        if ($this->connector->read($this->getOdooResourceType(), $odoo_id)) {
+            return true;
+        }
+        return false;
     }
-    return false;
-  }
-  
-  /**
+
+    /**
    * Retruns wether this item is syncable
    * By default false. 
    * 
