@@ -18,14 +18,16 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
     if (!empty($contribution['invoice_id']) && is_int($contribution['invoice_id']) && $this->existsInOdoo($contribution['invoice_id'])) {
       //contribution is created from within Odoo.
       //so do not sync back to Odoo
-      return false;
-      
+      return false; 
     }
     
+    //check if this contribution is still syncable
     $settings = CRM_OdooContributionSync_Factory::getSettingsForContribution($contribution);
     if ($settings === false) {
       try {
-        $this->credit($sync_entity->getOdooId(), $sync_entity);
+        if ($sync_entity->getOdooId()) {  
+            $this->credit($sync_entity->getOdooId(), $sync_entity);
+        }
       } catch (Exception $ex) {
         //do nothing
       }     
@@ -54,6 +56,14 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
    */
   public function performInsert(CRM_Odoosync_Model_OdooEntity $sync_entity) {
     $contribution = $this->getContribution($sync_entity->getEntityId());
+    
+    //check if date is a valid period in Odoo
+    $utils = CRM_OdooContributionSync_Utils::singleton();  
+    $date = new DateTime($contribution['receive_date']);
+    if (!$utils->isBookYearOpen($date->format('Y'))) {
+        throw new Exception('Bookyear: '.$date->format('Y').' doesn\'t exist in Odoo or is closed');
+    }
+    
     $invoice_id = $this->createInvoice($contribution, $sync_entity);
     if ($invoice_id) {      
       //invoice has the state open and confirmed
@@ -70,6 +80,14 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
    */
   public function performUpdate($odoo_id, CRM_Odoosync_Model_OdooEntity $sync_entity) {    
     $contribution = $this->getContribution($sync_entity->getEntityId());
+    
+    //check if date is a valid period in Odoo
+    $utils = CRM_OdooContributionSync_Utils::singleton();  
+    $date = new DateTime($contribution['receive_date']);
+    if (!$utils->isBookYearOpen($date->format('Y'))) {
+        throw new Exception('Bookyear: '.$date->format('Y').' doesn\'t exist in Odoo or is closed');
+    }
+    
     $invoice_id = $this->createInvoice($contribution, $sync_entity);
     if ($invoice_id) {
       //credit previous invoice

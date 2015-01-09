@@ -20,6 +20,8 @@ class CRM_OdooContributionSync_Utils {
   
   private $products = false;
   
+  private $openBookYears = array();
+  
   private function __construct() {
     $this->connector = CRM_Odoosync_Connector::singleton();
   }
@@ -62,6 +64,42 @@ class CRM_OdooContributionSync_Utils {
     }
     
     return $this->odooCurrencyIds[$code];
+  }
+  
+  /**
+   * Returns true if the book year exist in odoo and wether the book year is open
+   * 
+   * @param int $year
+   * @return int|false
+   */
+  public function isBookYearAvailable($year) {
+    //check if currency id exist in cache
+    //if not try to retrieve it from Odoo
+    if (!isset($this->openBookYears[$year])) {
+      $keys = array(
+        new xmlrpcval(array(
+          new xmlrpcval('name', 'string'),
+          new xmlrpcval('=', 'string'),
+          new xmlrpcval($year, 'string'),
+            ), "array"),
+          new xmlrpcval(array(
+          new xmlrpcval('state', 'string'),
+          new xmlrpcval('=', 'string'),
+          new xmlrpcval('draft', 'string'),
+            ), "array"),
+      );
+
+      $ids = $this->connector->search('account.fiscalyear', $keys);
+      foreach ($ids as $id_element) {
+        $this->openBookYears[$year] = true;
+        break;
+      }
+      if (!isset($this->openBookYears[$year])) {
+        $this->openBookYears[$year] = false;
+      }
+    }
+    
+    return $this->openBookYears[$year];
   }
   
   public function getAvailableCompanies() {
