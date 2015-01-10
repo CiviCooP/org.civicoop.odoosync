@@ -104,8 +104,6 @@ class CRM_OdooContributionSync_CreditInvoice {
       $line['invoice_id'] = new xmlrpcval($refund_invoice_id, 'int');
       if ($invoice_line['account_id']->scalarval()) {
         $line['account_id'] = new xmlrpcval($invoice_line['account_id']->scalarval(), 'int');
-      } elseif ($invoice['account_id']->scalarval()) {
-          $line['account_id'] = new xmlrpcval($invoice['account_id']->scalarval(), 'int');
       }
 
       $refund_line_id = $this->connector->create('account.invoice.line', $line);
