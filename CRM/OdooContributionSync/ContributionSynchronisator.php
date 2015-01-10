@@ -60,7 +60,7 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
     //check if date is a valid period in Odoo
     $utils = CRM_OdooContributionSync_Utils::singleton();  
     $date = new DateTime($contribution['receive_date']);
-    if (!$utils->isBookYearOpen($date->format('Y'))) {
+    if (!$utils->isBookYearAvailable($date->format('Y'))) {
         throw new Exception('Bookyear: '.$date->format('Y').' doesn\'t exist in Odoo or is closed');
     }
     
@@ -84,7 +84,7 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
     //check if date is a valid period in Odoo
     $utils = CRM_OdooContributionSync_Utils::singleton();  
     $date = new DateTime($contribution['receive_date']);
-    if (!$utils->isBookYearOpen($date->format('Y'))) {
+    if (!$utils->isBookYearAvailable($date->format('Y'))) {
         throw new Exception('Bookyear: '.$date->format('Y').' doesn\'t exist in Odoo or is closed');
     }
     
