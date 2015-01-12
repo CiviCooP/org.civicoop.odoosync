@@ -264,7 +264,7 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
     $line['invoice_line_tax_id'] = new xmlrpcval($tax, 'array');
     $line['name'] = new xmlrpcval($settings->getReference(), 'string');
     $line['price_unit'] = new xmlrpcval($contribution['total_amount'], 'double');
-    $line['account_id'] = new xmlrpcval($product['property_account_income']->scalarval(), 'int');
+    $line['account_id'] = new xmlrpcval($product['property_account_income']->scalarval()[0]->scalarval(), 'int');
     $line['product_id'] = new xmlrpcval($settings->getProductId(), 'int'); //do we need product id?
     $line['invoice_id'] = new xmlrpcval($invoice_id, 'int');
     
