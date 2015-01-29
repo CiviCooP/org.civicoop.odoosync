@@ -149,7 +149,13 @@ class CRM_OdooContributionSync_CreditInvoice {
   }
 
   protected function getIdAttributeFromInvoice($invoice, $attribute) {
+    if (!isset($invoice[$attribute])) {
+      throw new Exception('Could not find ID Attribute: '.$attribute);
+    }
     $id_obj = $invoice[$attribute]->scalarval();
+    if (!isset($id_obj[0])) {
+      throw new Exception('Could not find ID Attribute: '.$attribute);
+    }
     $id = $id_obj[0];
     return $id->scalarval();
   }
