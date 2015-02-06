@@ -53,30 +53,74 @@ function odoosync_civicrm_pageRun(&$page) {
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_navigationMenu
  */
-function odoosync_civicrm_navigationMenu( &$params ) {  
-  
-  $item = array(
-    "name" => 'odoo_admin',
-    "label" => ts("Odoo (OpenERP)"),
-    "permission" => "administer CiviCRM",
+function odoosync_civicrm_navigationMenu( &$params ) {
+
+  $maxKey = _postcodenl_getMenuKeyMax($params);
+  $parent =_postcodenl_get_parent_id_navigation_menu($params, 'Administer');
+
+  $key = $maxKey + 2;
+  $child[$key]['attributes'] = array (
+      "name"=> 'odoo_settings',
+      "label"=> ts('Settings'),
+      "url"=> "civicrm/admin/odoo",
+      "permission" => "administer CiviCRM",
+      'active' => 1,
+      'parentID' => $maxKey+1,
   );
-  _odoosync_insert_navigation_menu($params, "Administer", $item);
-  
-  $item_settings = array (
-    "name"=> 'odoo_settings',
-    "label"=> ts('Settings'),
-    "url"=> "civicrm/admin/odoo",
-    "permission" => "administer CiviCRM",
+  $child[$key]['child'] = array();
+
+  $key = $maxKey + 3;
+  $child[$key]['attributes'] = array (
+      "name"=> 'odoo_contribution_settings',
+      "label"=> ts('Contribution settings'),
+      "url"=> "civicrm/admin/odoo/contribution",
+      "permission" => "administer CiviCRM",
+      'active' => 1,
+      'parentID' => $maxKey+1,
   );
-  _odoosync_insert_navigation_menu($params, "Administer/odoo_admin", $item_settings);
-  $item_contribution = array (
-    "name"=> 'odoo_contribution_settings',
-    "label"=> ts('Contribution settings'),
-    "url"=> "civicrm/admin/odoo/contribution",
-    "permission" => "administer CiviCRM",
+  $child[$key]['child'] = array();
+
+
+  $parent['child'][$maxKey+1] = array(
+    'attributes' => array(
+      "name" => 'odoo_admin',
+      "label" => ts("Odoo (OpenERP)"),
+      "permission" => "administer CiviCRM",
+      "active" => 1,
+      "parentID" => $parent['attributes']['navID'],
+      "navID" => $maxKey+1,
+    ),
+    'child' => $child,
   );
-  
-  _odoosync_insert_navigation_menu($params, "Administer/odoo_admin", $item_contribution);
+}
+
+function _odoosync_get_parent_id_navigation_menu(&$menu, $path, &$parent = NULL) {
+  // If we are done going down the path, insert menu
+  if (empty($path)) {
+    return $parent;
+  } else {
+    // Find an recurse into the next level down
+    $found = false;
+    $path = explode('/', $path);
+    $first = array_shift($path);
+    foreach ($menu as $key => &$entry) {
+      if ($entry['attributes']['name'] == $first) {
+        if (!$entry['child']) $entry['child'] = array();
+        $found = _postcodenl_get_parent_id_navigation_menu($entry['child'], implode('/', $path), $entry);
+      }
+    }
+    return $found;
+  }
+}
+
+function _odoosync_getMenuKeyMax($menuArray) {
+  $max = array(max(array_keys($menuArray)));
+  foreach($menuArray as $v) {
+    if (!empty($v['child'])) {
+      $max[] = _postcodenl_getMenuKeyMax($v['child']);
+    }
+  }
+  return max($max);
 }
 
 /**
