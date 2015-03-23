@@ -113,7 +113,14 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
     $parameters = $this->getOdooParameters($contribution, $partner_id, $sync_entity->getEntity(), $sync_entity->getEntityId(), 'create');
     $invoice_id = $this->connector->create($this->getOdooResourceType(), $parameters);
     if ($invoice_id) {
-      $odoo_line_id = $this->addInvoiceLine($contribution, $invoice_id, $sync_entity->getEntity(), $sync_entity->getEntityId(), 'create');
+      $odoo_line_id = false;
+      try {
+        $odoo_line_id = $this->addInvoiceLine($contribution, $invoice_id, $sync_entity->getEntity(), $sync_entity->getEntityId(), 'create');
+      } catch (Exception $e) {
+        //remove the invoice because we could not add the invoice line to the invoice
+        $this->connector->unlink($this->getOdooResourceType(), $invoice_id);
+        throw new exception('Could not create invoice line: '.$e->getMessage());
+      }
       if ($odoo_line_id === false) {
         //remove the invoice because we could not add the invoice line to the invoice
         $this->connector->unlink($this->getOdooResourceType(), $invoice_id);
@@ -260,11 +267,19 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
         "array" ));
     
     $product = $utils->getProductFromOdoo($settings->getProductId());
-    
+
+    $income_account_id = false;
+    if ($product['property_account_income']->scalarval()) {
+      $income_account_id = reset($product['property_account_income']->scalarval());
+    }
+    if (!$income_account_id) {
+      throw new Exception('Product Income account is not set in Odoo');
+    }
+
     $line['invoice_line_tax_id'] = new xmlrpcval($tax, 'array');
     $line['name'] = new xmlrpcval($settings->getReference(), 'string');
     $line['price_unit'] = new xmlrpcval($contribution['total_amount'], 'double');
-    $line['account_id'] = new xmlrpcval($product['property_account_income']->scalarval()[0]->scalarval(), 'int');
+    $line['account_id'] = new xmlrpcval($income_account_id->scalarval(), 'int');
     $line['product_id'] = new xmlrpcval($settings->getProductId(), 'int'); //do we need product id?
     $line['invoice_id'] = new xmlrpcval($invoice_id, 'int');
     
