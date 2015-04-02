@@ -67,9 +67,11 @@ class CRM_Odoosync_Connector {
     $this->setLastResponse($resp);
     
     $val = $resp->value();
-    $id = $val->scalarval();
-    if ($id > 0) {
-      return $id;
+    if ($val) {
+      $id = $val->scalarval();
+      if ($id > 0) {
+        return $id;
+      }
     }
 
     $this->log('Could not login into Odoo');
