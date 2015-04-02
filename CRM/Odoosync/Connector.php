@@ -74,7 +74,7 @@ class CRM_Odoosync_Connector {
       }
     }
 
-    $this->log('Could not login into Odoo');
+    $this->log('Could not login into Odoo (raw response: '.$resp->raw_data.' )');
     return false;
   }
   
