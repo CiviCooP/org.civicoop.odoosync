@@ -72,6 +72,7 @@ class CRM_OdooContributionSync_Page_OdooContributionSync extends CRM_Core_Page_B
     $connector = CRM_Odoosync_Connector::singleton();
     if ($connector->getUserId() === false) {
       CRM_Core_Session::setStatus(ts('Could not connect to Odoo. Did you provide the right settings?'), 'Problem connecting to Odoo', 'error');
+      CRM_Core_Session::setStatus($connector->getLastResponseMessage()->raw_data, 'Problem connecting to Odoo', 'error');
     }
 
     return parent::run();
