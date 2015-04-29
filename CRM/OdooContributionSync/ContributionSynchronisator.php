@@ -33,6 +33,17 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
       }     
       return false;
     }
+
+    //check status of contribution if status is cancelled invoice isn't pushed to Odoo then this
+    //contribution is not syncable
+    if ($contribution['contribution_status_id'] == CRM_Core_OptionGroup::getValue('contribution_status', 'Cancelled', 'name')) {
+      try {
+        $this->performDelete($sync_entity->getOdooId(), $sync_entity);
+      } catch (Exception $e) {
+        //do nothing
+      }
+      return false;
+    }
     
     return true;
   }
