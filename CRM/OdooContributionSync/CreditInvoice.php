@@ -8,6 +8,8 @@ class CRM_OdooContributionSync_CreditInvoice {
    */
   protected $connector;
 
+  protected $reference = false;
+
   public function __construct() {
     $this->connector = CRM_Odoosync_Connector::singleton();
   }
@@ -120,6 +122,14 @@ class CRM_OdooContributionSync_CreditInvoice {
     return false;
   }
 
+  public function getReference() {
+    return $this->reference;
+  }
+
+  public function setReference($reference) {
+    $this->reference = $reference;
+  }
+
   protected function createCreditInvoice($invoice, DateTime $date) {
     $utils = CRM_OdooContributionSync_Utils::singleton();
     $journal_id = $utils->getCreditJournalId();
@@ -127,12 +137,17 @@ class CRM_OdooContributionSync_CreditInvoice {
       throw new Exception('Refund journal not found');
     }
 
+    $reference = $this->getReference();
+    if (empty($reference)) {
+      $reference = $invoice['reference']->scalarval();
+    }
+
     $parameters = array();
     $parameters['type'] = new xmlrpcval('out_refund', 'string');
     $parameters['journal_id'] = new xmlrpcval($journal_id, 'int');
     $parameters['account_id'] = new xmlrpcval($this->getIdAttributeFromInvoice($invoice, 'account_id'), 'int');
     $parameters['partner_id'] = new xmlrpcval($this->getIdAttributeFromInvoice($invoice, 'partner_id'), 'int');
-    $parameters['reference'] = new xmlrpcval($invoice['reference']->scalarval(), 'string');
+    $parameters['reference'] = new xmlrpcval($reference, 'string');
     $parameters['company_id'] = new xmlrpcval($this->getIdAttributeFromInvoice($invoice, 'company_id'), 'int');
     $parameters['date_invoice'] = new xmlrpcval($date->format('Y-m-d'), 'string');
 
