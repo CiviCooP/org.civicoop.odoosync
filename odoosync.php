@@ -35,7 +35,7 @@ function odoosync_civicrm_post($op,$objectName, $objectId, &$objectRef) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_summary
  */
 function odoosync_civicrm_pageRun(&$page) {
-  if ($page instanceof CRM_Contact_Page_View_Summary) {
+  if ($page instanceof CRM_Contact_Page_View_Summary && CRM_Core_Permission::check('view contact in Odoo')) {
     $partnerLink = new CRM_OdooContactSync_PartnerLink($page->getVar('_contactId'));
     if ($partnerLink->contactIsPartner()) {
       CRM_Core_Region::instance('page-body')->add(array(
@@ -45,6 +45,10 @@ function odoosync_civicrm_pageRun(&$page) {
       $smarty->assign('link_to_odoo', $partnerLink->getLink());
     }
   }
+}
+
+function odoosync_civicrm_permission(&$permissions) {
+  $permissions['view contact in Odoo'] = ts('CiviCRM Odoo sync').': '.ts('Button view in Odoo is available');
 }
 
 
