@@ -155,7 +155,7 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
    * @param CRM_Odoosync_Model_OdooEntity $sync_entity
    */
   public function performDelete($odoo_id, CRM_Odoosync_Model_OdooEntity $sync_entity) {
-    if ($odoo_id) {
+    if ($odoo_id && $this->existsInOdoo($odoo_id)) {
       $deletable = $this->isInvoiceDeletable($odoo_id);
       if ($deletable) {
         $this->connector->unlink($this->getOdooResourceType(), $odoo_id);
