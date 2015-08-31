@@ -56,10 +56,14 @@ class CRM_OdooContributionSync_CreditInvoice {
     if ($debit_move_line_id === false) {
       return false;
     }
-    
-    $refund_move_id = $this->getIdAttributeFromInvoice($refund_invoice, 'move_id');
-    $credit_move_line_id = $utils->getMoveLineToAccount($account_id, $refund_move_id);
-    if ($credit_move_line_id === false) {
+
+    try {
+      $refund_move_id = $this->getIdAttributeFromInvoice($refund_invoice, 'move_id');
+      $credit_move_line_id = $utils->getMoveLineToAccount($account_id, $refund_move_id);
+      if ($credit_move_line_id === FALSE) {
+        return FALSE;
+      }
+    } catch (Exception $e) {
       return false;
     }
     
