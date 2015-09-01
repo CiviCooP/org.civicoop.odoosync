@@ -177,7 +177,7 @@ class CRM_Odoosync_Model_OdooEntity {
     //set lock
     $lock->lock();
     
-    $sql = "SELECT * FROM `civicrm_odoo_entity`  WHERE `action` IS NOT NULL AND `change_date` IS NOT NULL AND (`sync_date` IS NULL OR `change_date` > `sync_date`) ORDER BY `weight` ASC, `action` ASC, `change_date` ASC LIMIT 0, %1";
+    $sql = "SELECT * FROM `civicrm_odoo_entity`  WHERE `action` IS NOT NULL AND `change_date` IS NOT NULL AND (`sync_date` IS NULL OR `change_date` >= `sync_date`) ORDER BY `weight` ASC, `action` ASC, `change_date` ASC LIMIT 0, %1";
     $dao = CRM_Core_DAO::executeQuery($sql, array(1 => array($limit, 'Integer')));
     //sync this object
     while ($dao->fetch()) {
