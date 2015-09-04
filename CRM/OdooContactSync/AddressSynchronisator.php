@@ -157,6 +157,12 @@ class CRM_OdooContactSync_AddressSynchronisator extends CRM_Odoosync_Model_Objec
   protected function getAddress($entity_id) {
     if (!isset($this->_addressCache[$entity_id])) {
       $this->_addressCache[$entity_id] = civicrm_api3('Address', 'getsingle', array('id' => $entity_id));
+      if (!empty($this->_addressCache[$entity_id]['master_id'])) {
+        $master_address = $this->getAddress($this->_addressCache[$entity_id]['master_id']);
+        $master_address['contact_id'] = $this->_addressCache[$entity_id]['contact_id'];
+        $master_address['id'] = $this->_addressCache[$entity_id]['id'];
+        $this->_addressCache[$entity_id] = $master_address;
+      }
     }
     
     return $this->_addressCache[$entity_id];
