@@ -1882,7 +1882,7 @@
 							{
 								return false;
 							}
-							$response[$i] = new xmlrpcresp(0, $code, $str);
+							$response[$i] = new xmlrpcresp($val, $code, $str);
 							break;
 						default:
 							return false;
@@ -1928,7 +1928,7 @@
 							{
 								return false;
 							}
-							$response[$i] = new xmlrpcresp(0, $code->scalarval(), $str->scalarval());
+							$response[$i] = new xmlrpcresp($val, $code->scalarval(), $str->scalarval());
 							break;
 						default:
 							return false;
@@ -3598,7 +3598,7 @@ xmlrpc_encode_entitites($this->errstr, $GLOBALS['xmlrpc_internalencoding'], $cha
 				{
 					$vc = $v->structmem('faultCode');
 					$vs = $v->structmem('faultString');
-					$r = new xmlrpcresp(0, $vc->scalarval(), $vs->scalarval());
+					$r = new xmlrpcresp($v, $vc->scalarval(), $vs->scalarval());
 				}
 				else
 				{
