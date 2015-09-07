@@ -2702,7 +2702,7 @@ xmlrpc_encode_entitites($this->errstr, $GLOBALS['xmlrpc_internalencoding'], $cha
 						$errno_v = $v->structmem('faultCode');
 						$errstr_v = $v->structmem('faultString');
 						$errno = $errno_v->scalarval();
-						$errstr = $errstr_v->scalarval();
+						$errstr = $errno_v->scalarval();
 					}
 					else
 					{
