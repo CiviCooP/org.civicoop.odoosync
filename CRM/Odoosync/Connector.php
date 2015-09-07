@@ -228,6 +228,10 @@ class CRM_Odoosync_Connector {
   protected function setLastResponse($response) {
     $this->lastResponse = $response;
   }
+
+  public function getLastResponse() {
+    return $this->lastResponse;
+  }
   
   public function getLastResponseMessage() {
     return var_export($this->lastResponse, true);
