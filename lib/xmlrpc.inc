@@ -2716,7 +2716,7 @@ xmlrpc_encode_entitites($this->errstr, $GLOBALS['xmlrpc_internalencoding'], $cha
 						$errno = -1;
 					}
 
-					$r = new xmlrpcresp(0, $errno, $errstr);
+					$r = new xmlrpcresp($v, $errno, $errstr);
 				}
 				else
 				{
