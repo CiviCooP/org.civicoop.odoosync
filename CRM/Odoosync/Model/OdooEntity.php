@@ -205,6 +205,10 @@ class CRM_Odoosync_Model_OdooEntity {
    * @return int|false
    */
   public static function findOdooIdByEntityAndEntityId($entity, $entity_id) {
+    if (empty($entity_id) || !is_numeric($entity_id)) {
+      return false;
+    }
+
     $sql = "SELECT `odoo_id`  FROM `civicrm_odoo_entity` WHERE `entity` = %1  AND `entity_id`  = %2";
     $dao = CRM_Core_DAO::executeQuery($sql, array(
       1 => array($entity, 'String'),
