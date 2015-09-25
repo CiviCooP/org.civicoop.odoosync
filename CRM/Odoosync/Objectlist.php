@@ -40,6 +40,28 @@ class CRM_Odoosync_Objectlist {
       }
     } 
   }
+
+  /**
+   * Schedules an item to be synched again.
+   *
+   * This is usefull when a previous sync
+   * failed. Or when an item was not syncable but is now
+   *
+   */
+  public function restoreSyncItem($objectName, $objectId) {
+    foreach($this->list as $def) {
+      if ($def->isObjectNameSupported($objectName)) {
+        $data = array();
+        try {
+          $data = $def->getCiviCRMEntityDataById($objectId);
+        } catch (Exception $e) {
+          //do nothing
+        }
+        $this->resaveForSync($objectId, $data, $def);
+        break;
+      }
+    }
+  }
   
   public function complementSyncQueue($limit=1000) {
     $itemsToSync = $limit;
@@ -60,7 +82,7 @@ class CRM_Odoosync_Objectlist {
       while($dao->fetch()) {
         $data = array();
         try {
-          $data = $def->getCiviCRMEntityDataById($objectId);
+          $data = $def->getCiviCRMEntityDataById($dao->id);
         } catch (Exception $e) { 
           //do nothing
         }
@@ -96,6 +118,51 @@ class CRM_Odoosync_Objectlist {
       return true;
     }
     return false;
+  }
+
+  protected function resaveForSync($objectId, $data, CRM_Odoosync_Model_ObjectDefinitionInterface $objectDef) {
+    $this->resetProcessedEntityList();
+
+    //check if entity exist already exist
+    $dao = CRM_Core_DAO::executeQuery("SELECT * FROM `civicrm_odoo_entity` WHERE `entity` = %1 AND `entity_id` = %2", array(
+      1 => array($objectDef->getCiviCRMEntityName(), 'String'),
+      2 => array($objectId, 'Positive')
+    ));
+
+    $action = "UPDATE";
+
+    if ($dao->fetch()) {
+      if ($dao->status == 'SYNCED') {
+        return; //do not resync items which are in sync state
+      }
+
+      //do update of current item
+      if (!empty($dao->action) && $dao->action == 'INSERT') {
+        $action = 'INSERT';
+      }
+      $sql = "UPDATE `civicrm_odoo_entity` SET `action` = %1, `weight` = %2, `change_date` = NOW(), `status` = 'OUT OF SYNC' WHERE `id` = %3";
+      CRM_Core_DAO::executeQuery($sql, array(
+        1 => array($action, 'String'),
+        2 => array($objectDef->getWeight($action), 'Integer'),
+        3 => array($dao->id, 'Integer')
+      ));
+    } else {
+      //insert entity
+      if ($action != 'DELETE') {
+        $action = 'INSERT';
+      }
+      $sql = "INSERT INTO `civicrm_odoo_entity` (`action`, `change_date`, `entity`, `entity_id`, `weight`, `status`) VALUES(%1, NOW(), %2, %3, %4, 'OUT OF SYNC');";
+      CRM_Core_DAO::executeQuery($sql, array(
+        1 => array($action, 'String'),
+        2 => array($objectDef->getCiviCRMEntityName(), 'String'),
+        3 => array($objectId, 'Positive'),
+        4 => array($objectDef->getWeight($action), 'Integer'),
+      ));
+    }
+
+    $this->setProcessedEntity($objectDef->getCiviCRMEntityName(), $objectId);
+
+    $this->saveAllDependencies($objectDef, $objectId, $action, $data);
   }
   
   protected function saveForSync($op, $objectId, $data, CRM_Odoosync_Model_ObjectDefinitionInterface $objectDef) {

@@ -62,6 +62,10 @@ class CRM_Odoosync_Model_OdooEntity {
   public function getChangeDate() {
     return $this->change_date;
   }
+
+  public function setOdooId($odooId=null) {
+    $this->odoo_id = $odooId;
+  }
   
   public function setOdooField($field) {
     $this->odoo_field = $field;
