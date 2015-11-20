@@ -160,7 +160,7 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
       if ($deletable) {
         $this->connector->unlink($this->getOdooResourceType(), $odoo_id);
         $sync_entity->setOdooId(null);
-      } else {      
+      } else {
         $this->credit($odoo_id, $sync_entity);
       }
     }
@@ -177,15 +177,26 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
   /**
    * Create a credit invoice for an existing invoice in Odoo
    * 
-   * @param type $odoo_id
+   * @param int $invoice_id
+   * @param CRM_Odoosync_Model_OdooEntity $sync_entity
+   * @return bool
+   *
    */
   protected function credit($invoice_id, CRM_Odoosync_Model_OdooEntity $sync_entity) {
     if (!$invoice_id) {
       return false;
     }
     if ($sync_entity->getOdooField() != 'refunded') {
+
+      $contribution = false;
+      try {
+        $contribution = $this->getContribution($sync_entity->getEntityId());
+      } catch (Exception $e) {
+        //do nothing
+      }
+
       $credit = new CRM_OdooContributionSync_CreditInvoice();
-      $result = $credit->credit($invoice_id, $sync_entity->getChangeDate());
+      $result = $credit->credit($invoice_id, $sync_entity->getChangeDate(), $contribution);
       if ($result) {
         $sync_entity->setOdooField('refunded');
       }

@@ -14,10 +14,10 @@ class CRM_OdooContributionSync_CreditInvoice {
     $this->connector = CRM_Odoosync_Connector::singleton();
   }
 
-  public function credit($odoo_invoice_id, DateTime $date) {
+  public function credit($odoo_invoice_id, DateTime $date, $contribution) {
     $invoice = $this->connector->read($this->getOdooResourceType(), $odoo_invoice_id);
 
-    $refund_invoice_id = $this->createCreditInvoice($invoice, $date);
+    $refund_invoice_id = $this->createCreditInvoice($invoice, $date, $contribution);
     if (!$this->convertInvoiceLineToCreditInvoiceLine($invoice, $refund_invoice_id)) {
       $this->connector->unlink($this->getOdooResourceType(), $refund_invoice_id);
       throw new Exception('Could not convert invoice lines to credit invoice lines');
@@ -134,7 +134,7 @@ class CRM_OdooContributionSync_CreditInvoice {
     $this->reference = $reference;
   }
 
-  protected function createCreditInvoice($invoice, DateTime $date) {
+  protected function createCreditInvoice($invoice, DateTime $date, $contribution) {
     $utils = CRM_OdooContributionSync_Utils::singleton();
     $journal_id = $utils->getCreditJournalId();
     if (!$journal_id) {
@@ -160,6 +160,9 @@ class CRM_OdooContributionSync_CreditInvoice {
       $parameters['currency_id'] = new xmlrpcval($invoice['currency_id']->scalarval(), 'int');
     }
 
+    $contribution_id = (!empty($contribution['id']) ? $contribution['id'] : false);
+    $this->alterOdooParameters($parameters, 'account.invoice', 'civicrm_contribution', $contribution_id, 'credit');
+
     $credit_invoice_id = $this->connector->create($this->getOdooResourceType(), $parameters);
     if ($credit_invoice_id) {
       return $credit_invoice_id;
@@ -177,6 +180,26 @@ class CRM_OdooContributionSync_CreditInvoice {
     }
     $id = $id_obj[0];
     return $id->scalarval();
+  }
+
+  /**
+   * Invokes a hook to extend/change the Odoo parameters
+   *
+   * This could be useful to tweak for specific implementations
+   * e.g. at one client all partners in Odoo where companies, even if they are actual persons
+   *
+   * @param type $parameters
+   * @param type $entity
+   * @param type $entity_id
+   * @param String $action
+   *
+   */
+  public function alterOdooParameters(&$parameters, $resource, $entity, $entity_id, $action) {
+    try {
+      CRM_Utils_Hook::singleton()->invoke(5, $parameters, $resource, $entity, $entity_id, $action, 'civicrm_odoo_alter_parameters');
+    } Catch (Exception $ex) {
+      //do nothing
+    }
   }
 
 }
