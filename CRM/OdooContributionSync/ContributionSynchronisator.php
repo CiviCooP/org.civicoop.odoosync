@@ -196,7 +196,7 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
       }
 
       $credit = new CRM_OdooContributionSync_CreditInvoice();
-      $result = $credit->credit($invoice_id, $sync_entity->getChangeDate(), $contribution);
+      $result = $credit->credit($invoice_id, $sync_entity->getChangeDate(), $contribution, $sync_entity->getEntity());
       if ($result) {
         $sync_entity->setOdooField('refunded');
       }
