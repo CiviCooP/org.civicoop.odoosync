@@ -14,10 +14,10 @@ class CRM_OdooContributionSync_CreditInvoice {
     $this->connector = CRM_Odoosync_Connector::singleton();
   }
 
-  public function credit($odoo_invoice_id, DateTime $date, $contribution) {
+  public function credit($odoo_invoice_id, DateTime $date, $contribution, $contribution_id=false) {
     $invoice = $this->connector->read($this->getOdooResourceType(), $odoo_invoice_id);
 
-    $refund_invoice_id = $this->createCreditInvoice($invoice, $date, $contribution);
+    $refund_invoice_id = $this->createCreditInvoice($invoice, $date, $contribution, $contribution_id);
     if (!$this->convertInvoiceLineToCreditInvoiceLine($invoice, $refund_invoice_id)) {
       $this->connector->unlink($this->getOdooResourceType(), $refund_invoice_id);
       throw new Exception('Could not convert invoice lines to credit invoice lines');
@@ -134,7 +134,7 @@ class CRM_OdooContributionSync_CreditInvoice {
     $this->reference = $reference;
   }
 
-  protected function createCreditInvoice($invoice, DateTime $date, $contribution) {
+  protected function createCreditInvoice($invoice, DateTime $date, $contribution, $contribution_id) {
     $utils = CRM_OdooContributionSync_Utils::singleton();
     $journal_id = $utils->getCreditJournalId();
     if (!$journal_id) {
@@ -160,7 +160,10 @@ class CRM_OdooContributionSync_CreditInvoice {
       $parameters['currency_id'] = new xmlrpcval($invoice['currency_id']->scalarval(), 'int');
     }
 
-    $contribution_id = (!empty($contribution['id']) ? $contribution['id'] : false);
+    if (empty($contribution_id) && !empty($contribution['id'])) {
+      $contribution_id = $contribution['id'];
+    }
+
     $this->alterOdooParameters($parameters, 'account.invoice', 'civicrm_contribution', $contribution_id, 'credit');
 
     $credit_invoice_id = $this->connector->create($this->getOdooResourceType(), $parameters);
