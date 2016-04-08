@@ -6,6 +6,11 @@ class CRM_OdooContactSync_PhoneSynchronisator extends CRM_Odoosync_Model_ObjectS
   
   public function isThisItemSyncable(CRM_Odoosync_Model_OdooEntity $sync_entity) {
     $phone = $this->getPhone($sync_entity->getEntityId());
+    $odoo_partner_id = $sync_entity->findOdooIdByEntity('civicrm_contact', $phone['contact_id']);
+    if ($odoo_partner_id <= 0) {
+      return false;
+    }
+
     $field = $this->detemerineOdooFieldForPhone($phone);
     
     //only sync phone types

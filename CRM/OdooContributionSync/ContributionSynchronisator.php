@@ -6,6 +6,12 @@ class CRM_OdooContributionSync_ContributionSynchronisator extends CRM_Odoosync_M
   
   public function isThisItemSyncable(CRM_Odoosync_Model_OdooEntity $sync_entity) {
     $contribution = $this->getContribution($sync_entity->getEntityId());
+
+    $odoo_partner_id = $sync_entity->findOdooIdByEntity('civicrm_contact', $contribution['contact_id']);
+    if ($odoo_partner_id <= 0) {
+      return false;
+    }
+
     if (isset($contribution['is_test']) && $contribution['is_test']) {
       try {
         $this->performDelete($sync_entity->getOdooId(), $sync_entity);

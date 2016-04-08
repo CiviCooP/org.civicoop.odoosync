@@ -137,7 +137,7 @@ class CRM_Odoosync_Objectlist {
       }
 
       //do update of current item
-      if (!empty($dao->action) && $dao->action == 'INSERT') {
+      if ((!empty($dao->action) && $dao->action == 'INSERT') || $dao->odoo_id <= 0) {
         $action = 'INSERT';
       }
       $sql = "UPDATE `civicrm_odoo_entity` SET `action` = %1, `weight` = %2, `change_date` = NOW(), `status` = 'OUT OF SYNC' WHERE `id` = %3";
@@ -229,7 +229,6 @@ class CRM_Odoosync_Objectlist {
     $hooks = CRM_Utils_Hook::singleton();
     $hooks->invoke(5, $deps, $objectDef, $entity_id, $action, $data, 'civicrm_odoo_object_definition_dependency');
     
-    
     foreach($deps as $dep) {        
       $this->saveDependency($dep, $objectDef->getWeight($action) + $dep->getWeightOffset());
     }
@@ -237,7 +236,7 @@ class CRM_Odoosync_Objectlist {
   
   private function saveDependency(CRM_Odoosync_Model_Dependency $dep, $weight) {
     $objectDef = $this->getDefinitionForEntity($dep->getEntity());
-    
+
     if ($objectDef === false) {
       return;
     }
@@ -254,9 +253,9 @@ class CRM_Odoosync_Objectlist {
     
     if ($dao->fetch()) {
       //entity exist
-      if ($dep->isQueuedForUpdate()) {
+      if ($dep->isQueuedForUpdate() || $dao->odoo_id <= 0) {
         $action = "UPDATE";
-        if ($dao->action == "INSERT") {
+        if ($dao->action == "INSERT" || $dao->odoo_id <= 0) {
           $action = "INSERT";
         }
         

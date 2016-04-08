@@ -6,6 +6,11 @@ class CRM_OdooContactSync_AddressSynchronisator extends CRM_Odoosync_Model_Objec
   
   public function isThisItemSyncable(CRM_Odoosync_Model_OdooEntity $sync_entity) {
     $address = $this->getAddress($sync_entity->getEntityId());
+    $odoo_partner_id = $sync_entity->findOdooIdByEntity('civicrm_contact', $address['contact_id']);
+    if ($odoo_partner_id <= 0) {
+      return false;
+    }
+
     //only sync primary addresses
     if ($address['is_primary']) {
       return true;

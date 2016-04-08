@@ -5,7 +5,7 @@
  * 
  */
 
-Class CRM_OdooContactSync_ContactDefinition extends CRM_Odoosync_Model_ObjectDefinition {
+Class CRM_OdooContactSync_ContactDefinition extends CRM_Odoosync_Model_ObjectDefinition implements CRM_Odoosync_Model_ObjectDependencyInterface {
   
   public function getCiviCRMEntityName() {
     return 'civicrm_contact';
@@ -39,6 +39,32 @@ Class CRM_OdooContactSync_ContactDefinition extends CRM_Odoosync_Model_ObjectDef
   
   public function getCiviCRMEntityDataById($id) {
     return civicrm_api3('Contact', 'getsingle', array('id' => $id));
+  }
+
+  public function getSyncDependenciesForEntity($entity_id, $data=false) {
+    $dep = array();
+    try {
+      $weightOffset = +10;
+      $phones = civicrm_api3('Phone', 'get', array('contact_id' => $entity_id));
+      foreach($phones['values'] as $phone) {
+        $dep[] = new CRM_Odoosync_Model_Dependency('civicrm_phone', $phone['id'], $weightOffset, true);
+      }
+      $emails = civicrm_api3('Email', 'get', array('contact_id' => $entity_id));
+      foreach($emails['values'] as $email) {
+        $dep[] = new CRM_Odoosync_Model_Dependency('civicrm_email', $email['id'], $weightOffset, true);
+      }
+      $addresses = civicrm_api3('Address', 'get', array('contact_id' => $entity_id));
+      foreach($addresses['values'] as $address) {
+        $dep[] = new CRM_Odoosync_Model_Dependency('civicrm_address', $address['id'], $weightOffset, true);
+      }
+      $contributions = civicrm_api3('Contribution', 'get', array('contact_id' => $entity_id));
+      foreach($contributions['values'] as $contribution) {
+        $dep[] = new CRM_Odoosync_Model_Dependency('civicrm_contribution', $contribution['id'], $weightOffset, true);
+      }
+    } catch (Exception $ex) {
+      //do nothing
+    }
+    return $dep;
   }
 }
 

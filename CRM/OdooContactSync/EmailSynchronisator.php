@@ -6,6 +6,11 @@ class CRM_OdooContactSync_EmailSynchronisator extends CRM_Odoosync_Model_ObjectS
   
   public function isThisItemSyncable(CRM_Odoosync_Model_OdooEntity $sync_entity) {
     $email = $this->getEmail($sync_entity->getEntityId());
+    $odoo_partner_id = $sync_entity->findOdooIdByEntity('civicrm_contact', $email['contact_id']);
+    if ($odoo_partner_id <= 0) {
+      return false;
+    }
+
     //only sync primary addresses
     if ($email['is_primary']) {
       return true;
