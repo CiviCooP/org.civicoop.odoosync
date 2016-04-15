@@ -57,9 +57,13 @@ Class CRM_OdooContactSync_ContactDefinition extends CRM_Odoosync_Model_ObjectDef
       foreach($addresses['values'] as $address) {
         $dep[] = new CRM_Odoosync_Model_Dependency('civicrm_address', $address['id'], $weightOffset, true);
       }
-      $contributions = civicrm_api3('Contribution', 'get', array('contact_id' => $entity_id));
+      $contributions = civicrm_api3('Contribution', 'get', array('contact_id' => $entity_id, 'options' => array('limit' => 100000000000)));
       foreach($contributions['values'] as $contribution) {
-        $dep[] = new CRM_Odoosync_Model_Dependency('civicrm_contribution', $contribution['id'], $weightOffset, true);
+        $odoo_id = CRM_Odoosync_Model_OdooEntity::findOdooIdByEntityAndEntityId('civicrm_contribution', $contribution['id']);
+        // Only sync contributions which aren't pushed to Odoo.
+        if (empty($odoo_id)) {
+          $dep[] = new CRM_Odoosync_Model_Dependency('civicrm_contribution', $contribution['id'], $weightOffset, TRUE);
+        }
       }
     } catch (Exception $ex) {
       //do nothing
