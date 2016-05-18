@@ -27,11 +27,11 @@ class CRM_Odoosync_Form_Report_OdooSyncQueueDetails extends CRM_Report_Form {
     $this->_columns = array();
     
     // get URL parameters
-    $this->_errorEntity = CRM_Utils_Type::escape(CRM_Utils_Array::value('entity', $_GET), 'String');
-    $this->_errorStatus = urldecode(CRM_Utils_Type::escape(CRM_Utils_Array::value('status', $_GET), 'String'));
-    $this->_errorLastError = urldecode(CRM_Utils_Type::escape(CRM_Utils_Array::value('last_error', $_GET), 'String'));
-    if (CRM_Utils_Type::escape(CRM_Utils_Array::value('max_records', $_GET), 'Positive')) {
-		$this->_maxRecords = CRM_Utils_Type::escape(CRM_Utils_Array::value('max_records', $_GET), 'Positive');
+    $this->_errorEntity = CRM_Utils_Request::retrieve('entity', 'String');
+    $this->_errorStatus = urldecode(CRM_Utils_Request::retrieve('status', 'String'));
+    $this->_errorLastError = urldecode(CRM_Utils_Request::retrieve('last_error', 'String'));
+    if (CRM_Utils_Request::retrieve('max_records', 'Positive')) {
+		$this->_maxRecords = CRM_Utils_Request::retrieve('max_records', 'Positive');
     }
     
     // make sure we have at least 1 parameter
