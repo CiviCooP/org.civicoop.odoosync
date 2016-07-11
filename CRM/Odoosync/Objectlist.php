@@ -230,11 +230,11 @@ class CRM_Odoosync_Objectlist {
     $hooks->invoke(5, $deps, $objectDef, $entity_id, $action, $data, 'civicrm_odoo_object_definition_dependency');
     
     foreach($deps as $dep) {        
-      $this->saveDependency($dep, $objectDef->getWeight($action) + $dep->getWeightOffset());
+      $this->saveDependency($dep);
     }
   }
   
-  private function saveDependency(CRM_Odoosync_Model_Dependency $dep, $weight) {
+  private function saveDependency(CRM_Odoosync_Model_Dependency $dep) {
     $objectDef = $this->getDefinitionForEntity($dep->getEntity());
 
     if ($objectDef === false) {
@@ -258,41 +258,35 @@ class CRM_Odoosync_Objectlist {
         if ($dao->action == "INSERT" || $dao->odoo_id <= 0) {
           $action = "INSERT";
         }
-        
-        $weightToUse = ($objectDef->getWeight($action) < $weight) ? $objectDef->getWeight($action) : $weight;
-        
         $sql = "UPDATE `civicrm_odoo_entity` SET `weight` = %1, `action` = %2, `change_date` = NOW(), `status` = 'OUT OF SYNC' WHERE `id` = %3";
         CRM_Core_DAO::executeQuery($sql, array(
-          1 => array($weightToUse, 'Integer'),
+          1 => array($objectDef->getWeight($action), 'Integer'),
           2 => array($action, 'String'),
           3 => array($dao->id, 'Integer')
         ));
       } else {
         $action = $dao->action;
-        $weightToUse = ($objectDef->getWeight($dao->action) < $weight) ? $objectDef->getWeight($dao->action) : $weight;
-        $sql = "UPDATE `civicrm_odoo_entity` SET `weight` = %1 WHERE `id` = %2";
+        $sql = "UPDATE `civicrm_odoo_entity` SET `weight` = %1, `change_date` = NOW(), `status` = 'OUT OF SYNC' WHERE `id` = %2";
         CRM_Core_DAO::executeQuery($sql, array(
-          1 => array($weightToUse, 'Integer'),
+          1 => array($objectDef->getWeight($action), 'Integer'),
           2 => array($dao->id, 'Integer')
         ));
       }     
     } else {
       //entity does not exist yet
       $action = 'INSERT';
-      $weightToUse = ($objectDef->getWeight($action) < $weight) ? $objectDef->getWeight($action) : $weight;
-      
       $sql = "INSERT INTO `civicrm_odoo_entity` (`action`, `change_date`, `entity`, `entity_id`, `weight`, `status`) VALUES(%1, NOW(), %2, %3, %4, 'OUT OF SYNC');";
       CRM_Core_DAO::executeQuery($sql, array(
         1 => array($action, 'String'),
         2 => array($dep->getEntity(), 'String'),
         3 => array($dep->getEntityId(), 'Positive'),
-        4 => array($weightToUse, 'Integer'),
+        4 => array($objectDef->getWeight($action), 'Integer'),
       ));
     }
     
     $this->setProcessedEntity($dep->getEntity(), $dep->getEntityId());
     
-    $this->saveAllDependencies($objectDef, $dep->getEntityId(), $weightToUse - 1, $action);
+    $this->saveAllDependencies($objectDef, $dep->getEntityId(), $action);
   }
   
   private function loadObjectlist() {

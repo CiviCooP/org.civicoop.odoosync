@@ -61,7 +61,7 @@ Class CRM_OdooContactSync_ContactDefinition extends CRM_Odoosync_Model_ObjectDef
       foreach($contributions['values'] as $contribution) {
         $odoo_id = CRM_Odoosync_Model_OdooEntity::findOdooIdByEntityAndEntityId('civicrm_contribution', $contribution['id']);
         // Only sync contributions which aren't pushed to Odoo.
-        if (empty($odoo_id)) {
+        if (empty($odoo_id) || $odoo_id < 1) {
           $dep[] = new CRM_Odoosync_Model_Dependency('civicrm_contribution', $contribution['id'], $weightOffset, TRUE);
         }
       }
