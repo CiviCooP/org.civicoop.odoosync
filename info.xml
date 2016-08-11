@@ -9,7 +9,7 @@
     <email>helpdesk@civicoop.org</email>
   </maintainer>
   <releaseDate>2016-07-11</releaseDate>
-  <version>1.5</version>
+  <version>1.5.1</version>
   <develStage>stable</develStage>
   <compatibility>
     <ver>4.4</ver>
