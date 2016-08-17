@@ -45,12 +45,32 @@ function odoosync_civicrm_pageRun(&$page) {
       $smarty->assign('link_to_odoo', $partnerLink->getLink());
     }
   }
+  if ($page instanceof CRM_Contribute_Page_Tab && CRM_Core_Permission::check('view contact in Odoo')) {
+    $status = new CRM_OdooContributionSync_Status($page->getVar('_id'), $page->getVar('_contactId'));
+    if ($status->contributionIsInOdoo()) {
+      CRM_Core_Region::instance('page-body')->add(array(
+        'template' => "CRM/Contribution/Page/Tab/link_to_odoo.tpl"
+      ));
+      $smarty = CRM_Core_Smarty::singleton();
+      $smarty->assign('link_to_odoo', $status->getLink());
+    }
+    CRM_Core_Region::instance('page-body')->add(array(
+      'template' => "CRM/Contribution/Page/Tab/status.tpl"
+    ));
+    $smarty = CRM_Core_Smarty::singleton();
+    $smarty->assign('odoo_sync_status', $status->getStatus());
+    $smarty->assign('odoo_is_resyncable', $status->isResyncable());
+    $smarty->assign('contribution_id', $page->getVar('_id'));
+  }
 }
 
 function odoosync_civicrm_permission(&$permissions) {
   $permissions['view contact in Odoo'] = ts('CiviCRM Odoo sync').': '.ts('Button view in Odoo is available');
 }
 
+function odoosync_civicrm_alterAPIPermissions($entity, $action, &$params, &$permissions) {
+  $permissions['odoo']['resync'] = array ('administer CiviCRM');
+}
 
 /**
  * Implementation of hook_civicrm_navigationMenu
