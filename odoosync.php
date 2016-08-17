@@ -45,7 +45,7 @@ function odoosync_civicrm_pageRun(&$page) {
       $smarty->assign('link_to_odoo', $partnerLink->getLink());
     }
   }
-  if ($page instanceof CRM_Contribute_Page_Tab && CRM_Core_Permission::check('view contact in Odoo')) {
+  if ($page instanceof CRM_Contribute_Page_Tab && CRM_Core_Permission::check('view contact in Odoo') && is_numeric($page->getVar('_id'))) {
     $status = new CRM_OdooContributionSync_Status($page->getVar('_id'), $page->getVar('_contactId'));
     if ($status->contributionIsInOdoo()) {
       CRM_Core_Region::instance('page-body')->add(array(
