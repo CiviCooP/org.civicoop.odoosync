@@ -65,7 +65,7 @@ class CRM_Odoosync_Utils_HookInvoker {
    * @return array
    *   Returns an array of CRM_Odoosync_Model_Dependency.
    */
-  public function hook_civicrm_odoo_object_definition_dependency($deps, $objectDef, $entity_id, $action, $data) {
+  public function hook_civicrm_odoo_object_definition_dependency(&$deps, $objectDef, $entity_id, $action, $data) {
     return $this->invoke('civicrm_odoo_object_definition_dependency', 5, $deps, $objectDef, $entity_id, $action, $data);
   }
 
@@ -78,7 +78,7 @@ class CRM_Odoosync_Utils_HookInvoker {
    * @param $list
    * @return array Returns an array with classes which implement the CRM_Odoosync_Model_ObjectDefinitionInterface
    */
-  public function hook_civicrm_odoo_object_definition($list) {
+  public function hook_civicrm_odoo_object_definition(&$list) {
     return $this->invoke('civicrm_odoo_object_definition', 1, $list);
   }
   
