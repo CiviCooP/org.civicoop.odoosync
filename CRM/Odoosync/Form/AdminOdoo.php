@@ -56,6 +56,17 @@ class CRM_Odoosync_Form_AdminOdoo extends CRM_Core_Form {
       ), //attributes 
       true // is required
     );
+
+    // add form elements
+    $this->add(
+      'text', // field type
+      'view_invoice_url', // field name
+      'View invoice URL', // field label
+      array(
+        'size' => CRM_Utils_Type::HUGE,
+      ), //attributes
+      true // is required
+    );
     
     $this->addButtons(array(
       array(
@@ -78,6 +89,7 @@ class CRM_Odoosync_Form_AdminOdoo extends CRM_Core_Form {
     $values['username'] = CRM_Core_BAO_Setting::getItem('org.civicoop.odoosync', 'username');
     $values['password'] = CRM_Core_BAO_Setting::getItem('org.civicoop.odoosync', 'password');
     $values['view_partner_url'] = CRM_Core_BAO_Setting::getItem('org.civicoop.odoosync', 'view_partner_url');
+    $values['view_invoice_url'] = CRM_Core_BAO_Setting::getItem('org.civicoop.odoosync', 'view_invoice_url');
     return $values;
   }
 
@@ -89,6 +101,7 @@ class CRM_Odoosync_Form_AdminOdoo extends CRM_Core_Form {
     CRM_Core_BAO_Setting::setItem($values['username'], 'org.civicoop.odoosync', 'username');
     CRM_Core_BAO_Setting::setItem($values['password'], 'org.civicoop.odoosync', 'password');
     CRM_Core_BAO_Setting::setItem($values['view_partner_url'], 'org.civicoop.odoosync', 'view_partner_url');
+    CRM_Core_BAO_Setting::setItem($values['view_invoice_url'], 'org.civicoop.odoosync', 'view_invoice_url');
     
     CRM_Core_Session::setStatus(ts('Saved Odoo settings'), ts('Odoo settings'), 'success');
     

@@ -50,7 +50,7 @@ class CRM_Odoosync_Objectlist {
    */
   public function restoreSyncItem($objectName, $objectId) {
     foreach($this->list as $def) {
-      if ($def->isObjectNameSupported($objectName)) {
+      if ($def->isObjectNameSupported($objectName) || $def->getCiviCRMEntityName() == $objectName) {
         $data = array();
         try {
           $data = $def->getCiviCRMEntityDataById($objectId);
