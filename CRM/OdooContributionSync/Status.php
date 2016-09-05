@@ -43,7 +43,7 @@ class CRM_OdooContributionSync_Status {
   }
 
   public static function determineResyncable($odoo_id, $status, $last_error) {
-    if ($odoo_id > 0 || ($status == 'OUT OF SYNC' && empty($last_error))) {
+    if ( ($odoo_id > 0 && $status == 'SYNCED') || ($status == 'OUT OF SYNC' && empty($last_error))) {
       return false;
     }
     return true;
