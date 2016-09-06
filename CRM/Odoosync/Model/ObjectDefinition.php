@@ -11,8 +11,8 @@ abstract class CRM_Odoosync_Model_ObjectDefinition implements CRM_Odoosync_Model
   
   public function getSynchronisator() {
     $hookedClass = $this->getSynchronisatorClass();
-    $hooks = CRM_Utils_Hook::singleton();
-    $hooks->invoke(2, $this, $hookedClass, CRM_Utils_Hook::$_nullObject, CRM_Utils_Hook::$_nullObject, CRM_Utils_Hook::$_nullObject, 'civicrm_odoo_synchronisator');
+    $hooks = CRM_Odoosync_Utils_HookInvoker::singleton();
+    $hooks->hook_civicrm_odoo_synchronisator($this, $hookedClass);
     if (!is_subclass_of($hookedClass, $this->getSynchronisatorClass())) {
       $hookedClass = $this->getSynchronisatorClass();
     }

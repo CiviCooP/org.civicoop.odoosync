@@ -199,7 +199,7 @@ class CRM_OdooContributionSync_CreditInvoice {
    */
   public function alterOdooParameters(&$parameters, $resource, $entity, $entity_id, $action) {
     try {
-      CRM_Utils_Hook::singleton()->invoke(5, $parameters, $resource, $entity, $entity_id, $action, 'civicrm_odoo_alter_parameters');
+      CRM_Odoosync_Utils_HookInvoker::singleton()->hook_civicrm_odoo_alter_parameters($parameters, $resource, $entity, $entity_id, $action);
     } Catch (Exception $ex) {
       //do nothing
     }

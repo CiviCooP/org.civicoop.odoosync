@@ -1,0 +1,1 @@
+ALTER TABLE `civicrm_odoo_entity` ADD INDEX `odoo_id` (`odoo_id`);

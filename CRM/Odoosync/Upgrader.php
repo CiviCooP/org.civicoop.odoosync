@@ -57,6 +57,11 @@ class CRM_Odoosync_Upgrader extends CRM_Odoosync_Upgrader_Base {
     return TRUE;
   }
 
+  public function upgrade_1008() {
+    $this->executeSqlFile('sql/upgrade_1008.sql');
+    return TRUE;
+  }
+
   public function uninstall() {
    $this->executeSqlFile('sql/uninstall.sql');
   }

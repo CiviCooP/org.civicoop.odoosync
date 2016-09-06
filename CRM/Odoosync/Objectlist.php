@@ -226,8 +226,8 @@ class CRM_Odoosync_Objectlist {
       $deps = $objectDef->getSyncDependenciesForEntity($entity_id, $data);
     }
     
-    $hooks = CRM_Utils_Hook::singleton();
-    $hooks->invoke(5, $deps, $objectDef, $entity_id, $action, $data, 'civicrm_odoo_object_definition_dependency');
+    $hooks = CRM_Odoosync_Utils_HookInvoker::singleton();
+    $hooks->hook_civicrm_odoo_object_definition_dependency($deps, $objectDef, $entity_id, $action, $data);
     
     foreach($deps as $dep) {        
       $this->saveDependency($dep);
@@ -291,8 +291,8 @@ class CRM_Odoosync_Objectlist {
   
   private function loadObjectlist() {
     $list = array();
-    $hooks = CRM_Utils_Hook::singleton();
-    $hooks->invoke(1, $list, CRM_Utils_Hook::$_nullObject, CRM_Utils_Hook::$_nullObject, CRM_Utils_Hook::$_nullObject, CRM_Utils_Hook::$_nullObject, 'civicrm_odoo_object_definition');
+    $hooks = CRM_Odoosync_Utils_HookInvoker::singleton();
+    $hooks->hook_civicrm_odoo_object_definition($list);
     
     $this->list = array();
     if (is_array($list)) {
