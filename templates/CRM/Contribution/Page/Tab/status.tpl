@@ -35,7 +35,7 @@
 <script type="text/javascript">
     {literal}
     cj(function() {
-        cj('.crm-contribution-view-form-block  > table.crm-info-panel').after('{/literal}{$odoo_status}{literal}');
+        cj('.crm-contribution-view-form-block  > table.crm-info-panel').after('{/literal}{$odoo_status|replace:"'":"\'"}{literal}');
     });
 
     function restoreSync(id) {
