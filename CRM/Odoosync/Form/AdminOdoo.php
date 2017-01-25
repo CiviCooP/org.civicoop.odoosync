@@ -39,7 +39,7 @@ class CRM_Odoosync_Form_AdminOdoo extends CRM_Core_Form {
     );
     
     $this->add(
-      'text', // field type
+      'password', // field type
       'password', // field name
       'Password', // field label
       array('size' => CRM_Utils_Type::HUGE), //attributes 
