@@ -140,7 +140,7 @@ class CRM_Odoosync_Objectlist {
       if ((!empty($dao->action) && $dao->action == 'INSERT') || $dao->odoo_id <= 0) {
         $action = 'INSERT';
       }
-      $sql = "UPDATE `civicrm_odoo_entity` SET `action` = %1, `weight` = %2, `change_date` = NOW(), `status` = 'OUT OF SYNC' WHERE `id` = %3";
+      $sql = "UPDATE `civicrm_odoo_entity` SET `action` = %1, `weight` = %2, `change_date` = NOW(), `status` = 'OUT OF SYNC', last_error_date = NULL, last_error = NULL WHERE `id` = %3";
       CRM_Core_DAO::executeQuery($sql, array(
         1 => array($action, 'String'),
         2 => array($objectDef->getWeight($action), 'Integer'),
