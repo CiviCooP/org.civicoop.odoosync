@@ -84,17 +84,6 @@ function odoosync_civicrm_navigationMenu( &$params ) {
 
   $key = $maxKey + 2;
   $child[$key]['attributes'] = array (
-      "name"=> 'odoo_settings',
-      "label"=> ts('Settings'),
-      "url"=> "civicrm/admin/odoo",
-      "permission" => "administer CiviCRM",
-      'active' => 1,
-      'parentID' => $maxKey+1,
-  );
-  $child[$key]['child'] = array();
-
-  $key = $maxKey + 3;
-  $child[$key]['attributes'] = array (
       "name"=> 'odoo_contribution_settings',
       "label"=> ts('Contribution settings'),
       "url"=> "civicrm/admin/odoo/contribution",

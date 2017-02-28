@@ -15,12 +15,24 @@ final class CRM_Odoosync_Config_OdooParameters {
   private $view_partner_url;
   
   private function __construct() {
-    $this->url = CRM_Core_BAO_Setting::getItem('org.civicoop.odoosync', 'url');
-    $this->databasename = CRM_Core_BAO_Setting::getItem('org.civicoop.odoosync', 'databasename');
-    $this->username = CRM_Core_BAO_Setting::getItem('org.civicoop.odoosync', 'username');
-    $this->password = CRM_Core_BAO_Setting::getItem('org.civicoop.odoosync', 'password');
-    $this->view_partner_url = CRM_Core_BAO_Setting::getItem('org.civicoop.odoosync', 'view_partner_url');
-    $this->view_invoice_url = CRM_Core_BAO_Setting::getItem('org.civicoop.odoosync', 'view_invoice_url');
+    /**
+     * Read the settings from civicrm.settings.php
+     *
+     * global $odoo_settings
+     * $odoo_settings['url'] = 'http://your.odoo:8069/xmlrpc/';
+     * $odoo_settings['databasename'] = 'databasename';
+     * $odoo_settings['username'] = 'username';
+     * $odoo_settings['password'] - 'password';
+     * $odoo_settings['view_partner_url'] = 'http://your.odoo:8069/?db=databasename#id={partner_id}&view_type=form&model=res.partner&action=569';
+     * $odoo_settings['view_invoice_url'] = 'http://your.odoo:8069/?db=databasename#id={partner_id}&view_type=form&model=res.invoice&action=456';
+     */
+    global $odoo_settings;
+    $this->url = $odoo_settings['url'];
+    $this->databasename = $odoo_settings['databasename'];
+    $this->username = $odoo_settings['username'];
+    $this->password = $odoo_settings['password'];
+    $this->view_partner_url = $odoo_settings['view_partner_url'];
+    $this->view_invoice_url = $odoo_settings['view_invoice_url'];
   }
   
   /**

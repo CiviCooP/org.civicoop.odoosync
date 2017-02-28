@@ -9,6 +9,24 @@ your own needs and use it at your own risk.
 It is a one-way synchronisation. So only data from civicrm to Odoo is 
 synchronised.
 
+Configuration
+-------------
+
+After you have installed the extension do not forget to add your settings to `civicrm.settings.php`:
+
+    <?php
+    // sites/default/civicrm.settings.php:
+    // ...
+    // ...
+    // At the bottom add:
+    global $odoo_settings;
+    $odoo_settings['url'] = 'http://your.odoo:8069/xmlrpc/';
+    $odoo_settings['databasename'] = 'databasename';
+    $odoo_settings['username'] = 'username';
+    $odoo_settings['password'] - 'password';
+    $odoo_settings['view_partner_url'] = 'http://your.odoo:8069/?db=databasename#id={partner_id}&view_type=form&model=res.partner&action=569';
+    $odoo_settings['view_invoice_url'] = 'http://your.odoo:8069/?db=databasename#id={partner_id}&view_type=form&model=res.invoice&action=456';
+
 Sync specification
 ------------------
 
