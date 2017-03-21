@@ -256,7 +256,19 @@ class CRM_Odoosync_Model_OdooEntity {
     $values = array();
     while($dao->fetch()) {
       $v = array();
-      CRM_Core_DAO::storeValues($dao, $v);
+      $v['id'] = $dao->id;
+      $v['entity_id'] = $dao->entity_id;
+      $v['entity'] = $dao->entity;
+      $v['odoo_resource'] = $dao->odoo_resource;
+      $v['odoo_id'] = $dao->odoo_id;
+      $v['odoo_field'] = $dao->odoo_field;
+      $v['change_date'] = $dao->change_date;
+      $v['sync_date'] = $dao->sync_date;
+      $v['action'] = $dao->action;
+      $v['weight'] = $dao->weight;
+      $v['last_error'] = $dao->last_error;
+      $v['status'] = $dao->status;
+      $v['data'] = $dao->data;
       $values[$dao->id] = $v;
     }
     
