@@ -137,21 +137,32 @@ class CRM_OdooContactSync_AddressSynchronisator extends CRM_Odoosync_Model_Objec
    * @return \xmlrpcval
    */
   protected function getOdooParameters($address, $entity, $entity_id, $action) {
-    $parameters = array(
-      'street' => new xmlrpcval($address['street_address'], 'string'),
-      'city' => new xmlrpcval($address['city'], 'string'),
-      'zip' => new xmlrpcval($address['postal_code'], 'string'),
-      'street2' => new xmlrpcval($address['supplemental_address_1'], 'string'),
-    );
-    
-    if (!empty($address['country_id'])) {
-      $country_id = $this->findOdooCountryId($address['country_id']);
-      $parameters['country_id'] = new xmlrpcval($country_id, 'int');
-    }
-    
-    if (!empty($address['state_province_id']) && !empty($address['country_id'])) {
-      $state_id = $this->findOdooStateId($address['state_province_id'], $address['country_id']);
-      $parameters['state_id'] = new xmlrpcval($state_id, 'int');
+    if ($action == 'clear') {
+      $parameters = array(
+        'street' => new xmlrpcval('', 'string'),
+        'city' => new xmlrpcval('', 'string'),
+        'zip' => new xmlrpcval('', 'string'),
+        'street2' => new xmlrpcval('', 'string'),
+        'country_id' => new xmlrpcval(0, 'int'),
+        'state_id' => new xmlrpcval(0, 'int'),
+      );
+    } else {
+      $parameters = array(
+        'street' => new xmlrpcval($address['street_address'], 'string'),
+        'city' => new xmlrpcval($address['city'], 'string'),
+        'zip' => new xmlrpcval($address['postal_code'], 'string'),
+        'street2' => new xmlrpcval($address['supplemental_address_1'], 'string'),
+      );
+
+      if (!empty($address['country_id'])) {
+        $country_id = $this->findOdooCountryId($address['country_id']);
+        $parameters['country_id'] = new xmlrpcval($country_id, 'int');
+      }
+
+      if (!empty($address['state_province_id']) && !empty($address['country_id'])) {
+        $state_id = $this->findOdooStateId($address['state_province_id'], $address['country_id']);
+        $parameters['state_id'] = new xmlrpcval($state_id, 'int');
+      }
     }
     
     $this->alterOdooParameters($parameters, $this->getOdooResourceType(), $entity, $entity_id, $action);
