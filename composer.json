@@ -1,0 +1,12 @@
+{
+  "name": "civicoop/org.civicoop.odoosync",
+  "description": "Synchronisation with Odoo. One way synchronisation from civicrm to Odoo.",
+  "type": "civicrm-module",
+  "authors": [
+    {
+      "name": "Jaap Jansma",
+      "email": "helpdesk@civicoop.org"
+    }
+  ],
+  "license": "AGPL-3.0"
+}
