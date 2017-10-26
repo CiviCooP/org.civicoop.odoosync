@@ -25,7 +25,7 @@ class CRM_OdooContactSync_AddressSynchronisator extends CRM_Odoosync_Model_Objec
   
   protected function clearAddressInOdoo(CRM_Odoosync_Model_OdooEntity $sync_entity, $address) {    
     //adress is not syncable, clear address of partner if item is already synced intoo Odoo
-    if (!empty($sync_entity->getOdooId()) && $sync_entity->getOdooId() > 0) {
+    if (!empty($sync_entity->getOdooId()) && $sync_entity->getOdooId() > 0 && $this->existsInOdoo($sync_entity->getOdooId())) {
       $ignoreFields = array('is_primary', 'id');
       foreach($address as $field => $val) {
         if (in_array($field, $ignoreFields)) {
